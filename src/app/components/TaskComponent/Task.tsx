@@ -8,7 +8,7 @@ import TaskMenu from "./TaskMenu/TaskMenu";
 export default function Task(){
   
     return(
-       <div className="flex w-full">
+       <div className="flex md:flex-row flex-col w-full ">
         <TaskMenu></TaskMenu>
         <TaskDisplay></TaskDisplay>
 
