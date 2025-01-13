@@ -8,7 +8,7 @@ export default function HabitsPage(){
      <div className="flex flex-col items-start w-dvw  content-center overflow-hidden">
      <div className="Habits-navbar flex flex-row  justify-between w-full ">
            <div className="flex flex-row items-center ">
-            <h3 className="text-2xl m-3">Habit Djura</h3>
+            <h3 className="text-2xl m-3">Habit</h3>
             <FontAwesomeIcon icon={faAngleDown} width={30} height={30} className="text-2xl "></FontAwesomeIcon>
            </div>
            <div className="Habit-Settings">
