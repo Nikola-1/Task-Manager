@@ -17,9 +17,9 @@ const Micro = Micro_5({weight:"400",subsets:['latin'],});
 export default function Nav(){
         const [active,setActive] = useState(false);
     return(
-        <div className={ +  active ? "nav float-left md:w-36 w-dvw  bg-blue-300 h-screen z-10 transition-transform " : "nav float-left md:w-36 w-dvw  bg-blue-300 h-fit md:h-screen z-10 transition-transform"}>
+        <div className={ +  active ? "nav float-left md:w-36   bg-blue-300 h-screen z-10 transition-transform " : "nav float-left md:w-36   bg-blue-300 h-fit md:h-screen z-10 transition-transform"}>
 
-             <div className="wrapper m-auto  w-dvw md:w-24  ">
+             <div className="wrapper m-auto  md:w-24  ">
                 <div className="flex flex-row md:block justify-between align-middle items-center m-auto w-11/12">
                
                 <FontAwesomeIcon icon={faList} className="md:hidden size-9 float-left text-blue-900" onClick={()=> active ? setActive(false) : setActive(true) }></FontAwesomeIcon>
