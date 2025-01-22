@@ -2,12 +2,17 @@
 import { faSmile } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function ListModal({isActive}){
-        const[active,setActive]=useState(isActive);
+
+interface ModalProps{
+    setActive:React.Dispatch<React.SetStateAction<boolean>>;
+    isActive:boolean
+}
+export default function ListModal({isActive,setActive}: ModalProps){
+      
     return(
-        <div className={active == true ? "flex absolute w-8/12 translate-x-1/4  top-2/4 left-0 shadow-md rounded-md bg-white  bottom-2/4 m-auto h-2/4  " : " hidden"} >
+        <div className={isActive == true ? "flex absolute w-8/12 translate-x-1/4  top-2/4 left-0 shadow-md rounded-md bg-white  bottom-2/4 m-auto h-2/4  " : " hidden"} >
         <div className=" inset-0 flex items-center align-middle justify-center w-full">
             <div className="flex  justify-between w-full h-full">
         <div className="flex flex-col p-3 relative">
@@ -28,7 +33,7 @@ export default function ListModal({isActive}){
                     <option>None</option>
                 </select>
             </div>
-            <div onClick={()=> setActive(false)} className="hover:bg-blue-300  hover:text-white hover:cursor-pointer float-right absolute bottom-0 p-2 m-1 border-2 text-blue-300 border-blue-300 rounded-md ">
+            <div onClick={()=> setActive(!isActive)} className="hover:bg-blue-300  hover:text-white hover:cursor-pointer float-right absolute bottom-0 p-2 m-1 border-2 text-blue-300 border-blue-300 rounded-md ">
                 <p className="">cancel</p>
             </div>
         </div>

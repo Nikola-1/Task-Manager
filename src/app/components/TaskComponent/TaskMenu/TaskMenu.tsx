@@ -8,9 +8,19 @@ import music from "../../../../assets/img/3d-music.png"
 import paperBag from "../../../../assets/img/3d-paper-bag.png"
 import { faAnglesDown, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react"
+import React, { useState } from "react"
 import "./TaskMenu.css";
-export default function TaskMenu(){
+interface TaskMenuProps {
+    setToggleModal: React.Dispatch<React.SetStateAction<boolean>>;
+   ToggleModal:boolean
+  }
+export default function TaskMenu({ ToggleModal,setToggleModal }: TaskMenuProps){
+    const handleOpenModal = ()=>{
+        setToggleModal(true);
+    }
+    const handleCloseModal = () => {
+        setToggleModal(false); // Zatvaranje modala
+      };
     const [toggle,setToggle] = useState(true);
     const [menuButtonToggle,setMenuButtonToggle] = useState(Number);
     return(
@@ -41,7 +51,7 @@ export default function TaskMenu(){
                 <h5 className="text-blue-900 font-bold m-3 p-0.5">List</h5>
                 <p className="bg-blue-300 w-fit m-3 p-0.5 text-blue-900">Used: 3/9</p>
                 </div>
-                <FontAwesomeIcon className="pr-3 hover:cursor-pointer text-blue-900" icon={faPlus} width={20} height={20}></FontAwesomeIcon>
+                <FontAwesomeIcon onClick={()=> setToggleModal(!ToggleModal)} className="pr-3 hover:cursor-pointer text-blue-900" icon={faPlus} width={20} height={20}></FontAwesomeIcon>
                 </div>
                 <ul className=" p-3">
                     <li onClick={()=>setMenuButtonToggle(1)} className={menuButtonToggle == 1 ? "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >
