@@ -2,7 +2,7 @@ import { faAngleDown, faCircle, faCubesStacked, faEllipsis, faGripVertical, faPl
 import { faCubes } from "@fortawesome/free-solid-svg-icons/faCubes";
 import { faListDots } from "@fortawesome/free-solid-svg-icons/faListDots";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import "./page.css";
 export default function HabitsPage(){
     return(
      <div className="flex flex-col items-start w-dvw  content-center overflow-hidden">
@@ -77,7 +77,7 @@ export default function HabitsPage(){
                             <p>1</p>
                         </div>
                         <div className="flex items-center w-full mt-1 mx-2 p-3 rounded-xl bg-blue-300">
-                                <FontAwesomeIcon icon={faSmile} className="text-xl p-1 m-1 bg-blue-900 rounded-xl text-white"></FontAwesomeIcon>
+                                <FontAwesomeIcon icon={faSmile} className="text-xl p-1 m-1 bg-blue-900 rounded-full text-white"></FontAwesomeIcon>
                         </div>
                 </div>
                 <div className="row1 flex flex-col w-full">
@@ -87,8 +87,22 @@ export default function HabitsPage(){
                             <h3 className="mr-2">Morning</h3>
                             <p>1</p>
                         </div>
-                        <div className="flex items-center w-full mt-1 mx-2 p-3 rounded-xl bg-blue-300">
-                                <FontAwesomeIcon icon={faSmile} className="text-xl p-1 m-1 bg-blue-900 rounded-xl text-white"></FontAwesomeIcon>
+                        <div className="flex items-center w-full mt-1 mx-2 p-3 rounded-xl h-fit justify-between bg-blue-300 relative">
+                                <FontAwesomeIcon icon={faSmile} className="text-xl p-1 m-1 bg-blue-900 rounded-full text-white"></FontAwesomeIcon>
+                                <div className=" flex ">
+                                     
+                                        <span className="circle"></span>
+                                      
+                                     
+                                        <span className="circle"></span>
+                                   
+                                     
+                                        <span className="circle"></span>
+                                       
+                                    
+                                        <span className="circle"></span>
+                                      
+                                </div>
                         </div>
                 </div>
             </div>
