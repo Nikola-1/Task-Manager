@@ -11,7 +11,7 @@ export default function CalendarModal({isActive,setActive}: ModalProps){
                 <div className=" inset-0 flex items-center align-middle justify-center w-full">
                     
                 <div className="flex flex-col p-3 relative w-full h-full">
-                    <h3>Add list</h3>
+                    <h3 className="">Add list</h3>
                     
                     <div className="flex w-max">
                         <p>Folder</p>

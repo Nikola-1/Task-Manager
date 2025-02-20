@@ -4,8 +4,10 @@ import { faCubes } from "@fortawesome/free-solid-svg-icons/faCubes";
 import { faListDots } from "@fortawesome/free-solid-svg-icons/faListDots";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./page.css";
-import { useState } from "react";
+import { useState,Component } from "react";
+
 export default function HabitsPage(){
+        
         var ArrayDays= [{
                 name:"Mon",
                 Ticked:false,
@@ -51,7 +53,7 @@ export default function HabitsPage(){
         <div className="Habits-week flex m-auto md:m-0 "> {/*Slajder napraviti*/}
                 {
                         ArrayDays.map((x)=><div className="flex">
-                                <div className="flex flex-col items-center justify-center bg-blue-300 rounded-md p-3 m-2">
+                                <div className="flex flex-col items-center justify-center bg-blue-300 rounded-md p-3 m-2" key={1}>
                                             <h3>{x['name']}</h3>
                                             <p>5</p>
                                             <FontAwesomeIcon icon={faCircle} > </FontAwesomeIcon>
