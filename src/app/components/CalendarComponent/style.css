@@ -1,0 +1,13 @@
+.dugme:hover .strelica{
+        transform: rotate(90deg);
+        transition: 0.2s ease-in-out;
+}
+.tekst{
+        display: none;
+}
+.dugme:hover ~ .tekst{
+        display: block;
+        position: absolute;
+      
+       
+}

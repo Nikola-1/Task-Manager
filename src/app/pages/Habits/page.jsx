@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./page.css";
 import { useState,Component } from "react";
 
+
 export default function HabitsPage(){
         
         var ArrayDays= [{
@@ -38,7 +39,8 @@ export default function HabitsPage(){
         },];
         const[Day,setDay] = useState(false); 
     return(
-     <div className="flex flex-col items-start w-dvw  content-center overflow-hidden">
+      <div className="w-full flex">
+     <div className="flex flex-col items-start w-2/4  content-center overflow-hidden border-r-2">
      <div className="Habits-navbar flex flex-row  justify-between w-full ">
            <div className="flex flex-row items-center ">
             <h3 className="text-2xl m-3">Habit</h3>
@@ -65,16 +67,32 @@ export default function HabitsPage(){
                 
                 
         </div>
-        <div className="Habits flex flex-col md:w-6/12  w-11/12 m-auto md:m-0">
-                <div className="row1 flex flex-col w-full">
+        <div className="Habits flex flex-col md:w-full  w-11/12 m-auto md:m-0">
+                <div className="row1 flex flex-col  w-full">
                         
                         <div className="flex items-center justify-start m-3">
                             <FontAwesomeIcon icon={faAngleDown}></FontAwesomeIcon>
                             <h3 className="mr-2">Morning</h3>
                             <p>1</p>
                         </div>
-                        <div className="flex items-center w-full mt-1 mx-2 p-3 rounded-xl h-fit justify-between bg-blue-300 relative">
-                                <FontAwesomeIcon icon={faSmile} className="text-xl p-1 m-1 bg-blue-900 rounded-full text-white"></FontAwesomeIcon>
+                        <div className="flex items-center w-11/12 mt-1 mx-2 p-3 rounded-xl h-fit justify-between bg-blue-300 relative">
+                        <div className="flex items-center ">
+                                <FontAwesomeIcon icon={faSmile} className="text-3xl p-2  m-1 bg-blue-900 rounded-full text-white"></FontAwesomeIcon>
+                                <p className="ml-2">Hello</p>
+                                </div>
+                                <div className=" flex ">
+                                     {ArrayDays.map((x)=><span className="circle"></span>)}
+                                        
+                                      
+                                     
+                                        
+                                </div>
+                        </div>
+                        <div className="flex items-center w-11/12 mt-1 mx-2 p-3 rounded-xl h-fit justify-between bg-blue-300 relative">
+                                <div className="flex items-center ">
+                                <FontAwesomeIcon icon={faSmile} className="text-3xl p-2  m-1 bg-blue-900 rounded-full text-white"></FontAwesomeIcon>
+                                <p className="ml-2">Hello</p>
+                                </div>
                                 <div className=" flex ">
                                      {ArrayDays.map((x)=><span className="circle"></span>)}
                                         
@@ -91,8 +109,11 @@ export default function HabitsPage(){
                             <h3 className="mr-2">Morning</h3>
                             <p>2</p>
                         </div>
-                        <div className="flex items-center w-full mt-1 mx-2 p-3 rounded-xl h-fit justify-between bg-blue-300 relative">
-                                <FontAwesomeIcon icon={faSmile} className="text-xl p-1 m-1 bg-blue-900 rounded-full text-white"></FontAwesomeIcon>
+                        <div className="flex items-center w-11/12 mt-1 mx-2 p-3 rounded-xl h-fit justify-between bg-blue-300 relative">
+                        <div className="flex items-center ">
+                                <FontAwesomeIcon icon={faSmile} className="text-3xl p-2  m-1 bg-blue-900 rounded-full text-white"></FontAwesomeIcon>
+                                <p className="ml-2">Hello</p>
+                                </div>
                                 <div className=" flex ">
                                      
                                 {ArrayDays.map((x)=><span className="circle" onClick={()=>Day ? setDay(false) : setDay(true)}></span>)}
@@ -103,6 +124,7 @@ export default function HabitsPage(){
             <div>
             
             </div>
-     </div>   
+     </div> 
+     </div>
     )
 }

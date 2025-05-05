@@ -1,4 +1,5 @@
 
+import CalendarComponent from "@/app/components/CalendarComponent/CalendarComponent";
 import {supabase} from "../../connection/supabaseClient"
 export default async function CalendarPage(){
     const {data,error} = await supabase.from("tasks").select('*');  //da bi resio problem prikazivanja treba kreirati policy sa sql komandom (true)
@@ -17,6 +18,7 @@ export default async function CalendarPage(){
                 {data?.map((item)=>(
                     <div key={item.id}>{item.name}</div>
                 ))}
+                
             </div>
         )
 }

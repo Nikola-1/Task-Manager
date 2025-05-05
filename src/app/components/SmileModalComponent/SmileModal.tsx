@@ -13,16 +13,16 @@ export default function SmileModal({isActive,setActive}: ModalProps){
                     
                 <div className="flex flex-col p-3 relative w-fit h-full ">
                   
-                    <div className="grid xl:grid-cols-12 grid-cols-5  gap-4 h-32 mb-3 overflow-scroll">
+                    <div className="grid xl:grid-cols-12 grid-cols-5  gap-4 h-32 mb-3 ">
                                 <img src="/img/3d-music.png" height={30} width={30}></img>
                                 <img src="/img/3d-paper-bag.png" height={30} width={30}></img>
                                 <img src="/img/3d-briefcase.png" height={30} width={30}></img>
-                                <img src="/img/3d-music.png" height={30} width={30}></img>
-                                <img src="/img/3d-paper-bag.png" height={30} width={30}></img>
-                                <img src="/img/3d-briefcase.png" height={30} width={30}></img>
-                                <img src="/img/3d-music.png" height={30} width={30}></img>
-                                <img src="/img/3d-paper-bag.png" height={30} width={30}></img>
-                                <img src="/img/3d-briefcase.png" height={30} width={30}></img>
+                                <img src="/img/3d-star.png" height={30} width={30}></img>
+                                <img src="/img/3d-tokens.png" height={30} width={30}></img>
+                                <img src="/img/3d-truck.png" height={30} width={30}></img>
+                                <img src="/img/first-aid.png" height={30} width={30}></img>
+                                <img src="/img/lunch-box.png" height={30} width={30}></img>
+                                <img src="/img/3d-present.png" height={30} width={30}></img>
                     </div>
                    
                    
