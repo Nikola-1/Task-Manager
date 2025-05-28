@@ -1,35 +1,42 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 import Image from "next/image"
 import Today from "../../../../assets/img/october.png"
 import SevenDays from "../../../../assets/img/7-days.png"
 import message from "../../../../assets/img/message-alert.png"
-import briefCase from "../../../../assets/img/3d-briefcase.png"
-import music from "../../../../assets/img/3d-music.png"
-import paperBag from "../../../../assets/img/3d-paper-bag.png"
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { faAngleDown, faAngleRight, faAnglesDown, faCheck, faMarker, faPlus, faSign, faTag, faTicket, faTicketAlt, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { supabase } from "@/app/connection/supabaseClient";
 import React, { useState,useEffect, useMemo } from "react"
 import "./TaskMenu.css";
 import { faCheckSquare } from "@fortawesome/free-solid-svg-icons/faCheckSquare"
+//import { FilterType } from "../Types/FilterType"
+import useFilterTasks from "../hooks/useFilterTasks"
 
 interface TaskMenuProps {
     setToggleModal: React.Dispatch<React.SetStateAction<boolean>>;
    ToggleModal:boolean
+   setTaskFilter: React.Dispatch<React.SetStateAction<string>>;
+   TaskFilter:string
+   categoryId:number
+    setCategoryId: React.Dispatch<React.SetStateAction<number>>;
+    setFilterImage: React.Dispatch<React.SetStateAction<string>>;
   }
   
-export default function TaskMenu({ ToggleModal,setToggleModal }: TaskMenuProps){
+export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage }: TaskMenuProps){
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [categories,setCategories] = useState<any[]>([]);
     const [visibleTags,setVisibleTags] = useState(false);
+    const [Filter, setFilter] = useState<string>("tasks");
     const ShowData = async()=>{
         const {data,error} = await supabase.from("Categories").select('*');
     
        setCategories(data ?? []);
        console.log(categories);
     }
-    const FilterData = ()=>{
-        
-    }
+    
     const handleOpenModal = ()=>{
         setToggleModal(true);
     }
@@ -43,11 +50,13 @@ export default function TaskMenu({ ToggleModal,setToggleModal }: TaskMenuProps){
     useEffect(()=>{
         ShowData()
     },[])
+    
     return(
         <div className="Task-menu border-blue-300 md:border-r-2 md:border-l-2 md:w-1/4" id="TaskMenu">
            
         <div className="task-menu-wrapper  w-full   md:h-screen    ">
         <FontAwesomeIcon icon={faAnglesDown} onClick={()=>{
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             toggle ? setToggle(false) : setToggle(true);
             
             }} className="size-16 md:hidden flex items-center justify-center align-middle m-auto text-blue-400 "></FontAwesomeIcon>
@@ -55,10 +64,18 @@ export default function TaskMenu({ ToggleModal,setToggleModal }: TaskMenuProps){
             <div className="Task-intervals ">
                 <ul className="p-3">
                 
-                    <li className="flex flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900">
+                    <li onClick={async()=>{
+                        setTaskFilter("Today");
+                         setCategoryId(0);
+                         setFilterImage("");
+                        }} className="flex flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900">
                         <div className="flex flex-row align-middle items-center "><Image src={Today} width={30} height={20} alt="Calendar with number on it"></Image> <p className="m-2">Today</p> </div> <p>3</p>
                     </li>
-                    <li className="flex justify-between  p-1   items-center text-blue-900">
+                    <li onClick={async()=>{
+                        setTaskFilter("7Days");
+                        setCategoryId(0);
+                         setFilterImage("");
+                    }} className="flex justify-between  p-1   items-center text-blue-900">
                         <div className="flex flex-row align-middle items-center"><Image src={SevenDays} width={30} height={20} alt="Calendar with number on it"></Image><p className="m-2">7 days</p> </div> <p>3</p>
                     </li>
                     <li className="flex justify-between   p-1   items-center text-blue-900">
@@ -78,7 +95,12 @@ export default function TaskMenu({ ToggleModal,setToggleModal }: TaskMenuProps){
                 <FontAwesomeIcon onClick={()=> setToggleModal(!ToggleModal)} className="pr-3 hover:cursor-pointer text-blue-900" icon={faPlus} width={20} height={20}></FontAwesomeIcon>
                 </div>
                 <ul className=" p-3">
-                {categories.map((cat,i)=> <li onClick={()=>setMenuButtonToggle(i)} key={i} className={menuButtonToggle == i ? "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >
+                {categories.map((cat,i)=> <li onClick={async ()=>{
+                    setMenuButtonToggle(i);
+                      setCategoryId(cat.id);
+                        setTaskFilter(cat.name);
+                        setFilterImage(cat.image)
+                    }} key={i} className={menuButtonToggle == i ? "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >
                         <div className=" group-[]:translate-x-3 transition-all  flex flex-row align-middle items-center "><img src={"../img/"+cat.image+".png"} width={20} height={10} alt="Calendar with number on it"></img> <p className="m-2">{cat.name}</p> </div> <p>3</p>
                     </li>)}
                 
@@ -106,13 +128,17 @@ export default function TaskMenu({ ToggleModal,setToggleModal }: TaskMenuProps){
                 
             </div>
             </div>
-            <div className="p-3 flex justify-start items-center align-middle text-center align-middle hover:cursor-pointer text-blue-900">
+            <div onClick={()=>{
+                setTaskFilter("Completed");
+                  setCategoryId(0);
+                setFilterImage("");
+            }} className="p-3 flex justify-start items-center align-middle text-center align-middle hover:cursor-pointer text-blue-900">
       
                 <FontAwesomeIcon icon={faCheckSquare} width={20} height={10} className="text-blue-300"/>
 
                 <p className="px-2">Completed</p>
                 </div>
-                <div className="p-3 flex justify-start items-center align-middle text-center align-middle hover:cursor-pointer text-blue-900">
+                <div onClick={()=>{setTaskFilter("Deleted");  setCategoryId(0);  setFilterImage("");}} className="p-3 flex justify-start items-center align-middle text-center align-middle hover:cursor-pointer text-blue-900">
                 <FontAwesomeIcon icon={faTrash} width={20} height={10} className="text-blue-300"/>
                 <p className="px-2">Deleted</p>
                 </div>
