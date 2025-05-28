@@ -35,3 +35,11 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 # Task-Manager
+Task-Manager application is a Task Management application which can be used for Managing Tasks(insert,delete),using Pomdoro stopWatch for maximazing studying, tracking habits.There is also a interactive Calendar where you can completely see which tasks are waiting for you in each month...
+Structure of Project:
+src-main code folder
+app- all code is located here
+component folder- components 
+connection folder - for connection with supabase Database
+pages - logic for React router 
+public/img - all images used for project 
