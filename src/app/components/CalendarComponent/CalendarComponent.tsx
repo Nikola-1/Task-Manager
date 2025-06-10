@@ -1,9 +1,10 @@
+/* eslint-disable react/jsx-key */
 'use client'
-import { faAnchorLock, faAngleLeft, faAngleRight, faArrowRight, faClock, faClockFour, faRepeat, faSign, faTimeline, faUserClock } from "@fortawesome/free-solid-svg-icons";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons/faArrowLeft";
+import {  faAngleLeft, faAngleRight, faClock, faRepeat, faSign } from "@fortawesome/free-solid-svg-icons";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { Component, useEffect, useMemo, useRef, useState } from "react";
-import { createRoot } from "react-dom/client";
+import React, { useEffect, useState } from "react";
+
 import "./style.css";
 interface ModalProps{
     setActive:React.Dispatch<React.SetStateAction<boolean>>;
@@ -12,14 +13,11 @@ interface ModalProps{
     calendarDate:Date | null;
     setCalendarDate:React.Dispatch<React.SetStateAction<Date | null>>
 }
-function handleClick(){
 
+export default function CalendarComponent({isActive,setActive,setCalendarDate}: ModalProps){
     
-}
-export default function CalendarComponent({isActive,setActive,calendarDate,setCalendarDate}: ModalProps){
-    
-    let date = new Date();
-    const n =30;
+
+    const n =31;
     const RepeatOptions =['Daily','Weekly','Monthly','Yearly']
     const MonthNames = [ "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"]
@@ -27,7 +25,7 @@ export default function CalendarComponent({isActive,setActive,calendarDate,setCa
     const [Month,setMonth] = useState(new Date().getMonth());
     const [Day,setDay] = useState(new Date().getDate()-1);
     const ReminderOptions =['1 day early','2 days early','3 days early','4 days early']
-    const TimeLimit = 12;
+  
     
   
     
@@ -35,7 +33,7 @@ export default function CalendarComponent({isActive,setActive,calendarDate,setCa
      
       
       setCalendarDate(new Date(`${Year}-${Month+1}-${Day+2}`));
-     
+      
     },[Year,Month,Day])
     
     return(
@@ -53,7 +51,7 @@ export default function CalendarComponent({isActive,setActive,calendarDate,setCa
                 <div className="grid grid-cols-7 ">
            
                   {
-                     [...Array(n)].map((e,i) => <span onClick={(f)=>{
+                     [...Array(n)].map((e,i) => <span onClick={()=>{
                        
                         setDay(i);
                         
@@ -73,7 +71,8 @@ export default function CalendarComponent({isActive,setActive,calendarDate,setCa
                         <option className="w-dvw">Time</option>
                         {
                      
-                     RepeatOptions.map((e) => <option>{e}</option>)
+                     // eslint-disable-next-line react/jsx-key
+                     RepeatOptions.map((e,i) => <option key={i}>{e}</option>)
                      
                    }
                     </select>
@@ -85,7 +84,7 @@ export default function CalendarComponent({isActive,setActive,calendarDate,setCa
                         <option className="w-dvw">Reminder</option>
                         {
                      
-                     ReminderOptions.map((e) => <option>{e}</option>)
+                     ReminderOptions.map((e,i) => <option key={i}>{e}</option>)
                      
                    }
                     </select>
@@ -127,7 +126,7 @@ export default function CalendarComponent({isActive,setActive,calendarDate,setCa
                         setActive(!isActive);
                       
                       
-                        setCalendarDate(null);
+                        setCalendarDate(new Date(`${Year}-${Month+1}-${Day+2}`));
                         
                         
                     }

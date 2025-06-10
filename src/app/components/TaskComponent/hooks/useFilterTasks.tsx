@@ -15,8 +15,8 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
         if(isCategory == null && category_id ==0){
 
         
-        if (filter === "Completed") table = "Completed";
-        else if (filter === "Deleted") table = "Deleted";
+        if (filter === "Completed") table = "tasks";
+        else if (filter === "Deleted") table = "tasks";
            
         try {
           
@@ -24,16 +24,23 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
                 ({ data, error } = await supabase
                     .from("tasks")
                     .select("*")
-                    .eq("date", new Date().toISOString().split("T")[0]));
+                    .eq("date", new Date().toISOString().split("T")[0]).eq("Completed",false));
             } else if (filter === "7Days") {
                 const date = new Date();
         
                 ({ data, error } = await supabase
                     .from("tasks")
                     .select("*").gte("date",new Date().toISOString().split("T")[0])
-                    .lte("date", new Date(date.setDate(date.getDate()+7)).toISOString().split("T")[0]));
-            } else {
-                ({ data, error } = await supabase.from(table).select("*"));
+                    .lte("date", new Date(date.setDate(date.getDate()+7)).toISOString().split("T")[0]).eq("Completed",false));
+            }
+            else if(filter === "Completed"){
+                 ({ data, error } = await supabase.from(table).select("*").eq("Completed",true));
+            }
+             else if(filter === "Deleted"){
+                 ({ data, error } = await supabase.from(table).select("*").eq("Deleted",true));
+            }
+             else {
+                ({ data, error } = await supabase.from(table).select("*").eq("Completed",false));
             }
 
             
@@ -49,7 +56,7 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
             ({ data, error } = await supabase
                     .from("tasks")
                     .select("*")
-                    .eq("category_id", category_id));
+                    .eq("category_id", category_id).eq("Completed","FALSE"));
         }
         if (error) {
                 console.error("Supabase error", error.message);
@@ -62,6 +69,30 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
     useEffect(() => {
         console.log(tasks);
         fetchData();
+        // Pretplata na UPDATE događaje
+    const subscription = supabase
+      .channel('custom-all-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'tasks',
+        },
+        (payload) => {
+          console.log('Update payload:', payload)
+          setTasks((prevItems) =>
+            prevItems.map((item) =>
+              item.id === payload.new.id ? payload.new : item
+            )
+          )
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(subscription)
+    }
     }, [filter,isCategory,category_id]);
 
     return {

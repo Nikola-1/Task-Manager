@@ -8,7 +8,11 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { supabase } from "@/app/connection/supabaseClient";
 import useFilterTasks from "../hooks/useFilterTasks";
-
+import { useEditor,EditorContent } from "@tiptap/react";
+import { StarterKit } from "@tiptap/starter-kit";
+import Document from '@tiptap/extension-document'
+import OrderedList from '@tiptap/extension-ordered-list'
+import ListItem from "@tiptap/extension-list-item";
 interface TaskDisplayProps {
     setToggleModal: React.Dispatch<React.SetStateAction<boolean>>;
    // setTask:React.Dispatch<React.SetStateAction<[]>>;
@@ -22,9 +26,24 @@ interface TaskDisplayProps {
    filterImage:string
   }
 export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksArray,setTasksProp,refreshTasks,filter,filterImage}:TaskDisplayProps){
-   
+  
     const [selectedTask,setSelectedTask] = useState(Object);
     const {tasks,loading} = useFilterTasks("tasks",null,0);
+
+     const editor = useEditor({
+    extensions: [
+      StarterKit,
+      OrderedList,
+      ListItem,
+      Document
+    ],
+    content: `${selectedTask.content}`,
+    
+  })
+  const saveContent = async(id:number)=>{
+      const html = editor?.getHTML();
+      const {error} = await supabase.from('tasks').update({content:html}).eq("id",id)
+  }
     const ShowData = async()=>{
        const {data,error} = await supabase.from("tasks").select("*")
     
@@ -42,7 +61,14 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
   }
   
     }
-    
+    const updateStatus = async(id:number)=>{
+        console.log("refreshTask is:",refreshTasks);
+        if(await supabase.from("tasks").select("*").eq("id",id).eq("Completed","FALSE")){
+                await supabase.from("tasks").update({Completed:"TRUE"}).eq("id",id);
+        }
+       
+        
+    }
     const [inputValue,setInputValue] = useState("Add task");
 const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
         setInputValue(e.target.value);
@@ -90,6 +116,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
             }
           
         }
+          if (!editor) return null
     return(
         
         <div className="w-full flex   ">
@@ -125,8 +152,13 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
                     {
                         tasksArray.length != 0 ?
                     tasksArray?.map((item)=>( 
-                   <div onClick={(i)=>setSelectedTask(item)} key={item.id} className="flex justify-between  items-center    text-blue-900 hover:bg-blue-300 transition-all p-3  "><div className="flex items-center  " key={item.id}>
-                        <input type="checkbox" className="m-1"></input><p className="">{item.name}</p></div><div className="flex items-center "><p className="mx-2">{
+                   <div onClick={async (i)=>{
+                    editor.commands.setContent(item.content)
+                    setSelectedTask(item);
+                    console.log(selectedTask )
+                    
+                    }} key={item.id} className="flex justify-between  items-center    text-blue-900 hover:bg-blue-300 transition-all p-3  "><div className="flex items-center  " key={item.id}>
+                        <input type="checkbox" className="m-1" onClick={()=> updateStatus(item.id)}></input><p className="">{item.name}</p></div><div className="flex items-center "><p className="mx-2">{
                     
                        item.date != null ? DateExpression(item.date) : "no date"
                         }</p><FontAwesomeIcon icon={faClose} onClick={()=>DeleteData(item.id)} className="cursor-pointer"></FontAwesomeIcon></div></div>
@@ -134,12 +166,26 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
                   
             </div> 
          
-            <div className="task-description w-2/4 hidden md:flex ">
-              <p>{selectedTask.name}</p>
-              <p>{selectedTask.text}</p>
-                
+            <div className="task-description w-2/4 hidden md:flex flex-col">
+              
+              
+               <div style={{ marginBottom: '1rem' }}>
+        <button className={editor.isActive('bold') ? "font-bold m-3" : "font-light m-3"} onClick={() => editor.chain().focus().toggleBold().run()}>
+          Bold
+        </button>
+        <button className={editor.isActive('italic') ? "font-bold m-3" : "font-light m-3"} onClick={() => editor.chain().focus().toggleItalic().run()}>
+          Italic
+        </button>
+        <button className={editor.isActive('orderedList') ? "font-bold m-3" : "font-light m-3"} onClick={() => editor.chain().focus().toggleOrderedList().run()}>
+          Ordered List
+        </button>
+        <button onClick={() => editor.chain().focus().unsetAllMarks().run()}>
+          Clear formatting
+        </button>
+      </div>
+                <EditorContent className="outline-none border-none ProseMirror" editor={editor}/>
             </div>
-            
+            <button onClick={()=>saveContent(selectedTask.id)}>Save</button>
         </div>
     )
 } 
