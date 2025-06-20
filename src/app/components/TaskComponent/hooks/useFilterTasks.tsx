@@ -24,14 +24,14 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
                 ({ data, error } = await supabase
                     .from("tasks")
                     .select("*")
-                    .eq("date", new Date().toISOString().split("T")[0]).eq("Completed",false));
+                    .eq("date", new Date().toISOString().split("T")[0]).eq("Completed",false).eq("Deleted",false));
             } else if (filter === "7Days") {
                 const date = new Date();
         
                 ({ data, error } = await supabase
                     .from("tasks")
                     .select("*").gte("date",new Date().toISOString().split("T")[0])
-                    .lte("date", new Date(date.setDate(date.getDate()+7)).toISOString().split("T")[0]).eq("Completed",false));
+                    .lte("date", new Date(date.setDate(date.getDate()+7)).toISOString().split("T")[0]).eq("Completed",false).eq("Deleted",false));
             }
             else if(filter === "Completed"){
                  ({ data, error } = await supabase.from(table).select("*").eq("Completed",true));
@@ -56,7 +56,7 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
             ({ data, error } = await supabase
                     .from("tasks")
                     .select("*")
-                    .eq("category_id", category_id).eq("Completed","FALSE"));
+                    .eq("category_id", category_id).eq("Completed","FALSE").eq("Deleted","FALSE"));
         }
         if (error) {
                 console.error("Supabase error", error.message);

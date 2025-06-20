@@ -13,6 +13,7 @@ import { StarterKit } from "@tiptap/starter-kit";
 import Document from '@tiptap/extension-document'
 import OrderedList from '@tiptap/extension-ordered-list'
 import ListItem from "@tiptap/extension-list-item";
+import TaskCategoryImage from "./TaskCategoryImage";
 interface TaskDisplayProps {
     setToggleModal: React.Dispatch<React.SetStateAction<boolean>>;
    // setTask:React.Dispatch<React.SetStateAction<[]>>;
@@ -24,8 +25,9 @@ interface TaskDisplayProps {
    refreshTasks: ()=> Promise<void>
    filter: string
    filterImage:string
+   categoryId:number
   }
-export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksArray,setTasksProp,refreshTasks,filter,filterImage}:TaskDisplayProps){
+export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksArray,setTasksProp,refreshTasks,filter,filterImage,categoryId}:TaskDisplayProps){
   
     const [selectedTask,setSelectedTask] = useState(Object);
     const {tasks,loading} = useFilterTasks("tasks",null,0);
@@ -51,9 +53,14 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
        console.log(tasksArray);
        
     }
+    const CategoryImage = async(id:number)=>{
+            const {data,error} = await supabase.from("Categories").select("image").eq("category_id",id).single();
+            console.log(data?.image)
+            return `${data?.image}`;
+    }
     const DeleteData = async (id:number)=>{
         console.log("refreshTasks is:", refreshTasks);
-        const { error } = await supabase.from("tasks").delete().eq("id", id);
+        const { error } = await supabase.from("tasks").update({Deleted:"TRUE"}).eq("id", id);
   if (!error) {
     refreshTasks(); // <<< ovo pokreće ponovni fetch iz hooka
   } else {
@@ -78,8 +85,11 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
         setToggleModal(true);
        
     }
-    const AddTask = async (name:string,fullDate:Date) =>{
-        const { error } = await supabase
+    const AddTask = async (name:string,fullDate:Date,categoryId?:number) =>{
+        
+      const { error } = categoryId != 0 ? await supabase
+        .from('tasks')
+        .insert({  name: name,date:fullDate,category_id:categoryId }) : await supabase
         .from('tasks')
         .insert({  name: name,date:fullDate });
        
@@ -131,7 +141,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
          
                         <input className="absolute z-20 bg-transparent outline-none group-focus-within:outline-none placeholder-white" onChange={handleChange} onKeyDown={(e)=>{
                             if(e.key === "Enter" && inputValue != "" && inputValue != " "){
-                                AddTask(inputValue,fullDate);
+                                AddTask(inputValue,fullDate,categoryId);
                                 ShowData();
                             }
                        
@@ -158,10 +168,12 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
                     console.log(selectedTask )
                     
                     }} key={item.id} className="flex justify-between  items-center    text-blue-900 hover:bg-blue-300 transition-all p-3  "><div className="flex items-center  " key={item.id}>
-                        <input type="checkbox" className="m-1" onClick={()=> updateStatus(item.id)}></input><p className="">{item.name}</p></div><div className="flex items-center "><p className="mx-2">{
-                    
+                        <input type="checkbox" className="m-1" onClick={()=> updateStatus(item.id)}></input><p className="">{item.name}</p>   <TaskCategoryImage id={item.category_id} /></div><div className="flex items-center "><p className="mx-2">{
+                          
                        item.date != null ? DateExpression(item.date) : "no date"
-                        }</p><FontAwesomeIcon icon={faClose} onClick={()=>DeleteData(item.id)} className="cursor-pointer"></FontAwesomeIcon></div></div>
+                        }</p>
+                     
+                        <FontAwesomeIcon icon={faClose} onClick={()=>DeleteData(item.id)} className="cursor-pointer"></FontAwesomeIcon></div></div>
                 )): <div className="flex justify-center align-middle items-center m-auto"><p className="flex justify-center align-middle items-center font-bold text-blue-900 ">No Tasks </p></div>}
                   
             </div> 
