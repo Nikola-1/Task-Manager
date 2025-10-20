@@ -40,7 +40,7 @@ export default function HabitsList(){
         },]);
         const toggleTicked = (index: number) =>{
             setDays((prevDays)=>
-                prevDays.map((day,i)=>
+                prevDays.map((day,i)=> 
                 i === index ? {...day,Ticked: !day.Ticked} : day
                 ))
             
