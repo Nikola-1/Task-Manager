@@ -23,9 +23,10 @@ interface TaskMenuProps {
    categoryId:number
     setCategoryId: React.Dispatch<React.SetStateAction<number>>;
     setFilterImage: React.Dispatch<React.SetStateAction<string>>;
+    setSelectedTask: React.Dispatch<React.SetStateAction<object | null>>;
   }
   
-export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage }: TaskMenuProps){
+export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage,setSelectedTask }: TaskMenuProps){
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [categories,setCategories] = useState<any[]>([]);
     const [visibleTags,setVisibleTags] = useState(false);
@@ -50,7 +51,7 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
     useEffect(()=>{
         ShowData()
     },[])
-    
+     
     return(
         <div className="Task-menu border-blue-300 md:border-r-2 md:border-l-2 md:w-1/4" id="TaskMenu">
            
@@ -67,6 +68,7 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
                     <li onClick={async()=>{
                         setTaskFilter("Today");
                          setCategoryId(0);
+                         setSelectedTask(null);
                          setFilterImage("");
                         }} className="flex flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900">
                         <div className="flex flex-row align-middle items-center "><Image src={Today} width={30} height={20} alt="Calendar with number on it"></Image> <p className="m-2">Today</p> </div> <p>3</p>
@@ -74,6 +76,7 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
                     <li onClick={async()=>{
                         setTaskFilter("7Days");
                         setCategoryId(0);
+                        setSelectedTask(null);
                          setFilterImage("");
                     }} className="flex justify-between  p-1   items-center text-blue-900">
                         <div className="flex flex-row align-middle items-center"><Image src={SevenDays} width={30} height={20} alt="Calendar with number on it"></Image><p className="m-2">7 days</p> </div> <p>3</p>
@@ -98,6 +101,7 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
                 {categories.map((cat,i)=> <li onClick={async ()=>{
                     setMenuButtonToggle(i);
                       setCategoryId(cat.id);
+                      setSelectedTask(null);
                         setTaskFilter(cat.name);
                         setFilterImage(cat.image)
                     }} key={i} className={menuButtonToggle == i ? "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >
@@ -131,7 +135,9 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
             <div onClick={()=>{
                 setTaskFilter("Completed");
                   setCategoryId(0);
+                  setSelectedTask(null);
                 setFilterImage("");
+                
             }} className="p-3 flex justify-start items-center align-middle text-center align-middle hover:cursor-pointer text-blue-900">
       
                 <FontAwesomeIcon icon={faCheckSquare} width={20} height={10} className="text-blue-300"/>

@@ -34,7 +34,7 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
                     .lte("date", new Date(date.setDate(date.getDate()+7)).toISOString().split("T")[0]).eq("Completed",false).eq("Deleted",false));
             }
             else if(filter === "Completed"){
-                 ({ data, error } = await supabase.from(table).select("*").eq("Completed",true));
+                 ({ data, error } = await supabase.from(table).select("*").eq("Completed",true).eq("Deleted",false));
             }
              else if(filter === "Deleted"){
                  ({ data, error } = await supabase.from(table).select("*").eq("Deleted",true));
@@ -67,7 +67,7 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
     };
 
     useEffect(() => {
-        console.log(tasks);
+    
         fetchData();
         // Pretplata na UPDATE događaje
     const subscription = supabase

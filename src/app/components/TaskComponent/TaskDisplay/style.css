@@ -1,0 +1,30 @@
+/* Širina scrollbara */
+::-webkit-scrollbar {
+  width: 10px;              /* vertikalni */
+  height: 10px;             /* horizontalni */
+}
+
+/* Pozadina trake (deo iza thumb-a) */
+::-webkit-scrollbar-track {
+  
+  border-radius: 10px;
+}
+
+/* Deo koji se pomera (thumb) */
+::-webkit-scrollbar-thumb {
+  background-color: #2786e5;
+  border-radius: 10px;
+  border: 2px solid #fff; /* daje “razmak” između thumb-a i trake */
+}
+
+/* Kada se hoveruje */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #999;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

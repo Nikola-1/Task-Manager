@@ -23,7 +23,7 @@ export default function CalendarComponent({isActive,setActive,setCalendarDate}: 
   "July", "August", "September", "October", "November", "December"]
     const [Year,setYear] = useState(new Date().getFullYear());
     const [Month,setMonth] = useState(new Date().getMonth());
-    const [Day,setDay] = useState(new Date().getDate()-1);
+    const [Day,setDay] = useState(new Date().getDate()+1);
     const ReminderOptions =['1 day early','2 days early','3 days early','4 days early']
   
     
@@ -32,7 +32,7 @@ export default function CalendarComponent({isActive,setActive,setCalendarDate}: 
     useEffect(()=>{
      
       
-      setCalendarDate(new Date(`${Year}-${Month+1}-${Day+2}`));
+      setCalendarDate(new Date(Year,Month,Day));
       
     },[Year,Month,Day])
     
@@ -53,12 +53,12 @@ export default function CalendarComponent({isActive,setActive,setCalendarDate}: 
                   {
                      [...Array(n)].map((e,i) => <span onClick={()=>{
                        
-                        setDay(i);
+                        setDay(i+2);
                         
                         
                         
                        
-                    }}  className={i==Day ? "p-2 text-center bg-blue-400 text-white transition-all rounded-xl" : "p-2 text-center" } key={i}>{i+1}</span>)
+                    }}  className={i==Day-2 ? "p-2 text-center bg-blue-400 text-white transition-all rounded-xl" : "p-2 text-center" } key={i}>{i+1}</span>)
 
                   }
                 </div>
@@ -116,7 +116,7 @@ export default function CalendarComponent({isActive,setActive,setCalendarDate}: 
                
                 <div className="flex w-full">
                     <button onClick={()=>{
-                      setCalendarDate(new Date(`${Year}-${Month+1}-${Day+2}`));
+                     setCalendarDate(new Date(Year,Month,Day));
                       
                         setActive(!isActive);
                         
@@ -125,8 +125,12 @@ export default function CalendarComponent({isActive,setActive,setCalendarDate}: 
                     <button onClick={()=>{
                         setActive(!isActive);
                       
-                      
-                        setCalendarDate(new Date(`${Year}-${Month+1}-${Day+2}`));
+                    const today = new Date();
+const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+localToday.setDate(localToday.getDate() + 1); // dodaje 1 dan
+setCalendarDate(localToday);
+
                         
                         
                     }
