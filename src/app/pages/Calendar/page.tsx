@@ -1,6 +1,5 @@
 
-import CalendarComponent from "@/app/components/CalendarComponent/CalendarComponent";
-import {supabase} from "../../connection/supabaseClient"
+import {supabase} from "../../connection/supabaseClient.jsx"
 export default async function CalendarPage(){
     const {data,error} = await supabase.from("tasks").select('*');  //da bi resio problem prikazivanja treba kreirati policy sa sql komandom (true)
 
