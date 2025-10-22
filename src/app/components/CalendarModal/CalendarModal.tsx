@@ -6,13 +6,13 @@ import { useEffect, useState } from "react";
 interface ModalProps{
     setActive:React.Dispatch<React.SetStateAction<boolean>>;
     isActive:boolean;
-    DateInherited:Date;
-    setDate:React.Dispatch<React.SetStateAction<Date>>;
+    DateInherited:Date | null;
+    setDate:React.Dispatch<React.SetStateAction<Date | null>>;
 }
 
 export default function CalendarModal({isActive,setActive,setDate}: ModalProps){
     
-    const [CalendarDate,setCalendarDate] = useState(new Date());
+    const [CalendarDate,setCalendarDate] = useState<Date | null>(new Date());
     useEffect(()=>{
         setDate(CalendarDate);
        
@@ -36,7 +36,7 @@ export default function CalendarModal({isActive,setActive,setDate}: ModalProps){
                             <option>None</option>
                         </select>
                     </div>
-                    <CalendarComponent calendarDate={CalendarDate} setCalendarDate={setCalendarDate} isActive={isActive} setActive={setActive} ></CalendarComponent>
+                    <CalendarComponent calendarDate={CalendarDate} setCalendarDate={(d) =>setCalendarDate(d as Date | null)} isActive={isActive} setActive={setActive} ></CalendarComponent>
                
                 </div>
                    
