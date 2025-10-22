@@ -20,8 +20,8 @@ interface TaskDisplayProps {
     setToggleModal: React.Dispatch<React.SetStateAction<boolean>>;
    // setTask:React.Dispatch<React.SetStateAction<[]>>;
    ToggleModal:boolean;
-   fullDate:Date;
-   setFullDate:React.Dispatch<React.SetStateAction<Date>>;
+    fullDate: Date | null;
+   setFullDate:React.Dispatch<React.SetStateAction<Date | null>>;
    tasksArray:any[];
    setTasksProp: React.Dispatch<React.SetStateAction<any[]>>
    refreshTasks: ()=> Promise<void>
