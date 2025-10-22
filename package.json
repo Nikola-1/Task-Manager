@@ -16,7 +16,7 @@
     "@react-three/fiber": "^9.4.0",
     "@supabase/supabase-js": "^2.48.0",
     "@tiptap/core": "^3.7.2",
-    "@tiptap/extension-list-item": "^2.14.0",
+    "@tiptap/extension-list-item": "^3.7.2",
     "@tiptap/extension-placeholder": "^3.7.2",
     "@tiptap/extensions": "^3.7.2",
     "@tiptap/pm": "^3.7.2",
