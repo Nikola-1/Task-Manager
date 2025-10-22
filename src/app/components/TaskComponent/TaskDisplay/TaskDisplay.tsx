@@ -8,7 +8,7 @@ import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Placeholder } from '@tiptap/extensions'
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { supabase } from "@/app/connection/Supabaseclient";
+import { supabase } from "@/app/Connection/Supabaseclient";
 import useFilterTasks from "../hooks/useFilterTasks";
 import { useEditor,EditorContent } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";

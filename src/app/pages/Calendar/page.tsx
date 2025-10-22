@@ -1,5 +1,5 @@
 
-import {supabase} from "@/app/connection/Supabaseclient"
+import {supabase} from "@/app/Connection/Supabaseclient"
 export default async function CalendarPage(){
     const {data,error} = await supabase.from("tasks").select('*');  //da bi resio problem prikazivanja treba kreirati policy sa sql komandom (true)
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { supabase } from "@/app/connection/Supabaseclient";
+import { supabase } from "@/app/Connection/Supabaseclient";
 import { useEffect, useState } from "react";
 //import { FilterType } from "../Types/FilterType";
 
