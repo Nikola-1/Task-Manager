@@ -1,4 +1,4 @@
-import { supabase } from "@/app/Connection/Supabaseclient";
+import { supabase } from "@/app/Connection/SupabaseClient";
 import { useEffect, useState } from "react";
 
 
