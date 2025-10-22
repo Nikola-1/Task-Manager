@@ -136,7 +136,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
     },[])
     useEffect(()=>{
         
-      
+       console.log(selectedDate);
   
     },[selectedDate])
     

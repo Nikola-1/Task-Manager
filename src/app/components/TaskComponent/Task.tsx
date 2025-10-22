@@ -12,7 +12,7 @@ import useFilterTasks from "./hooks/useFilterTasks";
 export default function Task(){
     const [toggleModalMenu,setToggleModalMenu] = useState(false); 
     const [toggleModalCalendar,setToggleModalCalendar] = useState(false); 
-    const [selectedDate,setSelectedDate] = useState(new Date());
+    const [selectedDate,setSelectedDate] = useState<Date | null>(new Date());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [Tasks,setTasks] = useState<any[]>([]);
     const [selectedTask,setSelectedTask] = useState(Object);
