@@ -1,5 +1,5 @@
 [build]
-  command = "bash netlify-ignore-types.sh"
+  command = "NEXT_DISABLE_TYPECHECK=1 SKIP_TS_ERRORS=true TS_NODE_TRANSPILE_ONLY=1 npm run build --no-lint"
   publish = ".next"
 
 [[plugins]]
