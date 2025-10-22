@@ -67,7 +67,7 @@ export default function HabitsList(){
                                 <div onClick={()=>toggleTicked(i)} className="flex flex-col items-center justify-center bg-blue-300 rounded-md p-3 m-2" key={i}>
                                             <h3>{x['name']}</h3>
                                             <p>5</p>
-                                            {x.Ticked ?   <FontAwesomeIcon icon={faCircle} className="text-white" > </FontAwesomeIcon> :   <FontAwesomeIcon icon={faCircle} className="text-black" > </FontAwesomeIcon> }
+                                            {x.Ticked ?   <FontAwesomeIcon icon={faCircle} className="text-white" /> :   <FontAwesomeIcon icon={faCircle} className="text-black" />  }
                                           
                                 </div>
                         </div>)
