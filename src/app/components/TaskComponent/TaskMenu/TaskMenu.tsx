@@ -35,7 +35,7 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
         const {data,error} = await supabase.from("Categories").select('*');
     
        setCategories(data ?? []);
-       console.log(categories);
+       
     }
     
     const handleOpenModal = ()=>{

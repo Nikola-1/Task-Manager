@@ -34,10 +34,10 @@ export default function PomodoroPage(){
                        
                    
                        },1000)
-                       console.log('pera');
+                    
              }
               catch(error){
-                console.log(error);
+                //console.log(error);
               }
                 
                  

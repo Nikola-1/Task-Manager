@@ -7,9 +7,9 @@ export default async function CalendarPage(){
         console.error("Greska pri preuzimanju podataka:",error);
     }
     else{
-        console.log("pera");
+        
     }
-    console.log(data);
+    
         return(
             <div>
                 <p>Calendar</p>

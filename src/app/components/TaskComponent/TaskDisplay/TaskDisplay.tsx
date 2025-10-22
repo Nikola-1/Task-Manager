@@ -82,7 +82,7 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
             return `${data?.image}`;
     }
     const DeleteData = async (id:number)=>{
-        console.log("refreshTasks is:", refreshTasks);
+        
         const { error } = await supabase.from("tasks").update({Deleted:"TRUE"}).eq("id", id);
   if (!error) {
     setSelectedTask(null);
@@ -93,7 +93,7 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
   
     }
     const updateStatus = async(id:number)=>{
-        console.log("refreshTask is:",refreshTasks);
+        
         if(await supabase.from("tasks").select("*").eq("id",id).eq("Completed","FALSE")){
                 await supabase.from("tasks").update({Completed:"TRUE"}).eq("id",id);
         }
@@ -136,7 +136,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
     },[])
     useEffect(()=>{
         
-       console.log(selectedDate);
+      
   
     },[selectedDate])
     

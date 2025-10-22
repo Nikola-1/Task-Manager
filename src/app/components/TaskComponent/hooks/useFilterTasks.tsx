@@ -80,7 +80,7 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
           table: 'tasks',
         },
         (payload) => {
-          console.log('Update payload:', payload)
+          
           setTasks((prevItems) =>
             prevItems.map((item) =>
               item.id === payload.new.id ? payload.new : item
