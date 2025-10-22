@@ -8,7 +8,7 @@ import message from "../../../../assets/img/message-alert.png"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { faAngleDown, faAngleRight, faAnglesDown, faCheck, faMarker, faPlus, faSign, faTag, faTicket, faTicketAlt, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { supabase } from "@/app/connection/supabaseclient";
+import { supabase } from "@/app/connection/Supabaseclient";
 import React, { useState,useEffect, useMemo } from "react"
 import "./TaskMenu.css";
 import { faCheckSquare } from "@fortawesome/free-solid-svg-icons/faCheckSquare"
