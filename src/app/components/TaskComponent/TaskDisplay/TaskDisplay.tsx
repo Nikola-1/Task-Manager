@@ -7,7 +7,7 @@ import { faCalendar, faClose, faEarListen, faEllipsis, faNoteSticky, faSadCry, f
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Placeholder } from '@tiptap/extensions'
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState, useReducer } from "react";
 import { supabase } from "@/app/connection/supabaseclient";
 import useFilterTasks from "../hooks/useFilterTasks";
 import { useEditor,EditorContent } from "@tiptap/react";
@@ -16,9 +16,11 @@ import Document from '@tiptap/extension-document'
 import OrderedList from '@tiptap/extension-ordered-list'
 import ListItem from "@tiptap/extension-list-item";
 import TaskCategoryImage from "./TaskCategoryImage";
+import  {TextStyle,FontFamily}  from '@tiptap/extension-text-style'
+
 interface TaskDisplayProps {
     setToggleModal: React.Dispatch<React.SetStateAction<boolean>>;
-   // setTask:React.Dispatch<React.SetStateAction<[]>>;
+
    ToggleModal:boolean;
     fullDate: Date | null;
    setFullDate:React.Dispatch<React.SetStateAction<Date | null>>;
@@ -36,18 +38,22 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
     const [selectedTask,setSelectedTask] = useState<object | null>(Object);
     const {tasks,loading} = useFilterTasks("tasks",null,0);
     const [activeTask,setActiveTask] = useState<string | undefined>("");
+    const [activeButtonEditor,setActiveButtonEditor] = useState<boolean>(false);
      const editor = useEditor({
     extensions: [
       StarterKit,
+      TextStyle,
       OrderedList,
       ListItem,
       Document,
       Placeholder.configure({
         placeholder: "Write something awesome..."
-      })
+      }),
+      FontFamily
     ],
     content: selectedTask != null ? `${selectedTask.content}` : "",
       immediatelyRender: false,
+    
   })
   useEffect(()=>{
     setSelectedTask(TaskProp);
@@ -151,7 +157,22 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
             }
           
         }
-          if (!editor) return null
+         const [, forceUpdate] = useReducer(x=>x+1,0);
+          useEffect(()=>{
+            if(!editor) return;
+
+            const rerender = () => forceUpdate();
+            editor.on('selectionUpdate',rerender);
+            editor.on('transaction',rerender);
+
+            return ()=>{
+              editor.off('selectionUpdate',rerender);
+              editor.off('transaction',rerender);
+            }
+          }, [editor])
+          if (!editor) return null;
+     
+         
     return(
         
         <div className="w-full flex h-full   ">
@@ -220,20 +241,36 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
          {selectedTask != null ? <div className="task-description w-2/4 hidden md:flex flex-col">
               
               
-               <div style={{ marginBottom: '1rem' }}>
-        <button className={editor.isActive('bold') ? "font-bold m-3" : "font-light m-3"} onClick={() => editor.chain().focus().toggleBold().run()}>
+               <div style={{ margin: '0.4rem' }}>
+        <button className="text-white border-2 bg-blue-300 p-1 rounded-md text-sm m-1 border-blue-300 hover:bg-white hover:text-blue-300" onClick={() => editor.chain().focus().toggleBold().run()}>
           Bold
         </button>
-        <button className={editor.isActive('italic') ? "font-bold m-3" : "font-light m-3"} onClick={() => editor.chain().focus().toggleItalic().run()}>
+        <button className="text-white border-2 bg-blue-300 p-1 rounded-md text-sm m-1 border-blue-300 hover:bg-white hover:text-blue-300" onClick={() => editor.chain().focus().toggleItalic().run()}>
           Italic
         </button>
-        <button className={editor.isActive('orderedList') ? "font-bold m-3" : "font-light m-3"} onClick={() => editor.chain().focus().toggleOrderedList().run()}>
+        <button className="text-white border-2 bg-blue-300 p-1 rounded-md text-sm m-1 border-blue-300 hover:bg-white hover:text-blue-300" onClick={() => editor.chain().focus().toggleOrderedList().run()}>
           Ordered List
         </button>
-        <button onClick={() => editor.chain().focus().unsetAllMarks().run()}>
+        <button className="text-white border-2 bg-blue-300 p-1 rounded-md text-sm m-1 border-blue-300 hover:bg-white hover:text-blue-300" onClick={() => editor.chain().focus().unsetAllMarks().run()}>
           Clear formatting
         </button>
-         <button className={editor.isActive('orderedList') ? "font-bold m-3" : "font-light m-3"} onClick={()=>saveContent(selectedTask.id)}> Save</button>
+         <button className="text-white border-2  bg-blue-300 p-1 rounded-md text-sm m-1 border-blue-300 hover:bg-white hover:text-blue-300" onClick={()=>saveContent(selectedTask.id)}> Save</button>
+      </div>
+       <div className="flex justify-start mx-1 " style={{ marginBottom: '1rem' }}>
+        <select onChange={(e)=>editor.chain().focus().setFontFamily(e.target.value).run()} className="text-white border-2 bg-blue-300 p-1 rounded-md text-xs m-1 border-blue-300 hover:bg-white hover:text-blue-300" >
+         <option value={"Comic Sans MS"}>Comic Sans MS</option>
+            <option value={"Oswald"}>Oswald</option>
+               <option value={"Montserrat"}>Montserrat</option>
+               <option value={"Bebas Neue"}>Bebas Neue</option>
+            <option value={"Roboto"}>Roboto</option>
+            <option value={"Fascinate"}>Fascinate</option>
+               <option value={"Google Sans Code"}>Google Sans Code</option>
+        </select>
+          <div><p  className="text-white border-2 bg-blue-300 p-1 rounded-md text-xs m-1 border-blue-300 hover:bg-white hover:text-blue-300">  Comic Sans MS</p></div>
+            <div><p   className="text-white border-2 bg-blue-300 p-1 rounded-md text-xs m-1 border-blue-300 hover:bg-white hover:text-blue-300">H2</p></div>
+             <div><p  className="text-white border-2 bg-blue-300 p-1 rounded-md text-xs m-1 border-blue-300 hover:bg-white hover:text-blue-300">H3</p></div>
+              <div><p className="text-white border-2 bg-blue-300 p-1 rounded-md text-xs m-1 border-blue-300  hover:bg-white hover:text-blue-300 ">H4</p></div>
+             
       </div>
       
                 <EditorContent className="outline-none border-none ProseMirror" editor={editor}/>
