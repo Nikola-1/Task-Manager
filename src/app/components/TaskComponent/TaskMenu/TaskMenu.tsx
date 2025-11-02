@@ -50,8 +50,9 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
     
     useEffect(()=>{
         ShowData()
+      
     },[])
-     
+    
     return(
         <div className="Task-menu border-blue-300 md:border-r-2 md:border-l-2 md:w-1/4" id="TaskMenu">
            
@@ -69,6 +70,7 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
                         setTaskFilter("Today");
                          setCategoryId(0);
                          setSelectedTask(null);
+                         
                          setFilterImage("");
                         }} className="flex flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900">
                         <div className="flex flex-row align-middle items-center "><Image src={Today} width={30} height={20} alt="Calendar with number on it"></Image> <p className="m-2">Today</p> </div> <p>3</p>
@@ -102,6 +104,7 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
                     setMenuButtonToggle(i);
                       setCategoryId(cat.id);
                       setSelectedTask(null);
+                      
                         setTaskFilter(cat.name);
                         setFilterImage(cat.image)
                     }} key={i} className={menuButtonToggle == i ? "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >

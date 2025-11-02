@@ -31,4 +31,14 @@
   word-break: break-word;
   overflow-wrap: break-word;
   overflow-x: hidden;
+  
+}
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #7aa3e8; /* siva, možeš promeniti po želji */
+  float: left;
+  height: 0;
+  pointer-events: none;
+  font-style: italic;
+  opacity: 0.6;
 }

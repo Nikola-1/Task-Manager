@@ -2,14 +2,14 @@
 
 import TaskDisplay from "./TaskDisplay/TaskDisplay";
 import TaskMenu from "./TaskMenu/TaskMenu";
-
 import ListModal from "./ListModal/ListModal";
 import { useEffect, useState } from "react";
 import CalendarModal from "../CalendarModal/CalendarModal";
 
 import useFilterTasks from "./hooks/useFilterTasks";
+import { Editor } from "@tiptap/core";
 //import { FilterType } from "./Types/FilterType";
-export default function Task(){
+export default function TaskComponent(){
     const [toggleModalMenu,setToggleModalMenu] = useState(false); 
     const [toggleModalCalendar,setToggleModalCalendar] = useState(false); 
     const [selectedDate,setSelectedDate] = useState<Date | null>(new Date());
@@ -37,15 +37,20 @@ export default function Task(){
     useEffect(()=>{
         setSelectedTask(null);
     },[])
+   
+    useEffect(()=>{
+        setSelectedTask(null);
+        console.log(selectedTask);
+    },[Filter,categoryId])
     return(
        <div className="flex md:flex-row flex-col w-full ">
           
         <TaskMenu setSelectedTask={setSelectedTask}  setFilterImage={setFilterImage} setCategoryId={setCategoryId} categoryId={categoryId} setToggleModal={setToggleModalMenu} setTaskFilter={setFilter} ToggleModal={toggleModalMenu} TaskFilter={Filter}></TaskMenu>
-        <TaskDisplay TaskProp={selectedTask} setSelectedTaskProp={setSelectedTask} categoryId={categoryId} filterImage={FilterImage} filter={Filter}   refreshTasks={refresh} tasksArray={Tasks} setTasksProp={setTasks} fullDate={selectedDate} setFullDate={setSelectedDate} ToggleModal={toggleModalCalendar} setToggleModal={setToggleModalCalendar}></TaskDisplay>
+        <TaskDisplay selectedTaskProp={selectedTask}  setSelectedTaskProp={setSelectedTask} categoryId={categoryId} filterImage={FilterImage} filter={Filter}   refreshTasks={refresh} tasksArray={Tasks} setTasksProp={setTasks} fullDate={selectedDate} setFullDate={setSelectedDate} ToggleModal={toggleModalCalendar} setToggleModal={setToggleModalCalendar}></TaskDisplay>
         <ListModal isActive={toggleModalMenu} setActive={setToggleModalMenu}></ListModal>
        
         <CalendarModal setDate={setSelectedDate} DateInherited={selectedDate}  isActive={toggleModalCalendar} setActive={setToggleModalCalendar}></CalendarModal>
-    
+        
     </div>
     )
 

@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendar, faClose, faEarListen, faEllipsis, faNoteSticky, faSadCry, faTrash, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { Placeholder } from '@tiptap/extensions'
+import Placeholder from '@tiptap/extension-placeholder'
 import React, { ChangeEvent, useEffect, useState, useReducer } from "react";
 import { supabase } from "@/app/connection/supabaseclient";
 import useFilterTasks from "../hooks/useFilterTasks";
@@ -17,6 +17,10 @@ import OrderedList from '@tiptap/extension-ordered-list'
 import ListItem from "@tiptap/extension-list-item";
 import TaskCategoryImage from "./TaskCategoryImage";
 import  {TextStyle,FontFamily}  from '@tiptap/extension-text-style'
+import Task from "../Task/Task";
+
+import { TaskType } from "../Types/TaskType";
+
 
 interface TaskDisplayProps {
     setToggleModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -24,18 +28,19 @@ interface TaskDisplayProps {
    ToggleModal:boolean;
     fullDate: Date | null;
    setFullDate:React.Dispatch<React.SetStateAction<Date | null>>;
-   tasksArray:any[];
+   tasksArray:TaskType[];
    setTasksProp: React.Dispatch<React.SetStateAction<any[]>>
    refreshTasks: ()=> Promise<void>
    filter: string
    filterImage:string
    categoryId:number
-   TaskProp:object | null;
-   setSelectedTaskProp: React.Dispatch<React.SetStateAction<object | null>>
+   
+   setSelectedTaskProp: React.Dispatch<React.SetStateAction<TaskType | null>>
+   selectedTaskProp:TaskType | null
   }
-export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksArray,setTasksProp,refreshTasks,filter,filterImage,categoryId,setSelectedTaskProp,TaskProp}:TaskDisplayProps){
+export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksArray,setTasksProp,refreshTasks,filter,filterImage,categoryId,setSelectedTaskProp,selectedTaskProp}:TaskDisplayProps){
   
-    const [selectedTask,setSelectedTask] = useState<object | null>(Object);
+    
     const {tasks,loading} = useFilterTasks("tasks",null,0);
     const [activeTask,setActiveTask] = useState<string | undefined>("");
     const [activeButtonEditor,setActiveButtonEditor] = useState<boolean>(false);
@@ -51,34 +56,74 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
       }),
       FontFamily
     ],
-    content: selectedTask != null ? `${selectedTask.content}` : "",
+    content: selectedTaskProp != null ? `${selectedTaskProp.content}` : `${Placeholder}`,
       immediatelyRender: false,
     
   })
-  useEffect(()=>{
-    setSelectedTask(TaskProp);
-  },[TaskProp])
-  //    useEffect(()=>{
+  useEffect(() => {
+     
+  if (editor && selectedTaskProp && selectedTaskProp?.content) {
+    editor.commands.clearContent()
+    editor.commands.setContent(selectedTaskProp?.content);
 
+  }
+}, [selectedTaskProp, editor]);
+useEffect(() => {
+
+  if (!selectedTaskProp || tasksArray.length === 0) return;
+
+  const updated = tasksArray.find(t => t.id === selectedTaskProp.id);
+
+  if (updated && updated.content !== selectedTaskProp.content) {
+
+    
+    setSelectedTaskProp({...updated})
+  }
+}, [tasksArray]);
+  
+  //    useEffect(()=>{
+ 
   
   const saveContent = async(id:number)=>{
-      const html = editor?.getHTML();
-      const {error} = await supabase.from('tasks').update({content:html}).eq("id",id)
+      const html = editor?.getHTML() || "";
+
+      
+      
+      const {error} = await supabase.from('tasks').update({content:html}).eq("id",id);
+      
+
+       if (!error) {
+  
+    console.log("Uspeh")
+  
+    
+      setTasksProp(tasks);
+      
+           editor?.commands.clearContent()
+    
+     
+    await refreshTasks();
+        
+    
+  } else {
+    console.error("Save failed:", error.message);
+    return;
+  }
   }
     const ShowData = async()=>{
-       const {data,error} = await supabase.from("tasks").select("*")
+       const {data,error} = await supabase.from("tasks").select("*").order("id", { ascending: true });
     
-       setTasksProp(tasks ?? []);
+       setTasksProp(data ?? []);
    
        
     }
     const deleteOneDeleted = async(id:number)=>{
         await supabase.from("tasks").delete().eq("id",id);
-        setSelectedTask(null);
+        setSelectedTaskProp(null);
          refreshTasks();
     }
     const deleteDeleted = async() =>{
-      setSelectedTask(null);
+      setSelectedTaskProp(null);
        tasksArray.forEach(async (e)=>await supabase.from("tasks").delete().eq("id", e.id));
        refreshTasks();
     }
@@ -91,7 +136,7 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
         
         const { error } = await supabase.from("tasks").update({Deleted:"TRUE"}).eq("id", id);
   if (!error) {
-    setSelectedTask(null);
+    setSelectedTaskProp(null);
     refreshTasks(); // <<< ovo pokreće ponovni fetch iz hooka
   } else {
     console.error("Delete failed:", error.message);
@@ -138,13 +183,11 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
     const [selectedDate,setSelectedDate] = useState('');
     useEffect(()=>{
      
-        refreshTasks()
+         refreshTasks();
     },[])
-    useEffect(()=>{
-        
-       console.log(selectedDate);
-  
-    },[selectedDate])
+   
+
+    
     
         function DateExpression(item: any){
        
@@ -170,6 +213,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
               editor.off('transaction',rerender);
             }
           }, [editor])
+          
           if (!editor) return null;
      
          
@@ -207,38 +251,19 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
                     </div>
                     
                     {filter == "Deleted" ?  <div className="flex justify-center  mx-auto m-3 w-9/12 h-fit bg-blue-400 font-bold text-white rounded-md cursor-pointer" onClick={deleteDeleted}>Delete</div> : <></>}
-                    <div className=" overflow-y-scroll h-96">
+                    
+
+                 <div className=" overflow-y-scroll h-96">
                     {
                         tasksArray.length != 0 ?
                     tasksArray?.map((item)=>( 
-                   <div onClick={async (i)=>{
-                    editor.commands.setContent(item.content)
-                    setSelectedTask(item);
-                    setSelectedTaskProp(item);
-                  
-                    setActiveTask(item.id);
-                    
-                    }} key={item.id} data-id={item.id}   className={`flex justify-between items-center text-blue-900 transition-all p-3 cursor-pointer
-          ${
-            activeTask === item.id
-              ? "bg-blue-400 hover:bg-blue-400" // aktivni task
-              : "hover:bg-blue-300" // ostali
-          }
-        `}><div className="flex items-center  " key={item.id}>
-                        <input type="checkbox" className="m-1" onClick={()=> updateStatus(item.id)}></input><p className="">{item.name}</p>  {item.category_id !== null && item.category_id !== undefined && (
-  <TaskCategoryImage id={item.category_id} />
-)}</div><div className="flex items-center "><p className="mx-2">{
-                          
-                       item.date != null ? DateExpression(item.date) : "no date"
-                        }</p>
-                     
-                     {filter != "Deleted" ?<FontAwesomeIcon icon={faClose} onClick={()=>DeleteData(item.id)} className="cursor-pointer"></FontAwesomeIcon> : <FontAwesomeIcon icon={faTrashAlt} onClick={()=>deleteOneDeleted(item.id)} className="cursor-pointer"></FontAwesomeIcon>}   </div></div>
+                   <Task  refreshTasks={refreshTasks} setSelectedTask={setSelectedTaskProp} filter={filter} editor={editor} activeTask={activeTask} setActiveTask={setActiveTask}  key={item.id} id={item.id}></Task>
                 )): <div className="flex justify-center align-middle items-center m-auto"><p className="flex justify-center align-middle items-center font-bold text-blue-900 ">No Tasks </p></div>
                 }
                  </div>
             </div> 
                 
-         {selectedTask != null ? <div className="task-description w-2/4 hidden md:flex flex-col">
+         {selectedTaskProp != null ? <div className="task-description w-2/4 hidden h-dvh md:flex flex-col">
               
               
                <div style={{ margin: '0.4rem' }}>
@@ -254,7 +279,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
         <button className="text-white border-2 bg-blue-300 p-1 rounded-md text-sm m-1 border-blue-300 hover:bg-white hover:text-blue-300" onClick={() => editor.chain().focus().unsetAllMarks().run()}>
           Clear formatting
         </button>
-         <button className="text-white border-2  bg-blue-300 p-1 rounded-md text-sm m-1 border-blue-300 hover:bg-white hover:text-blue-300" onClick={()=>saveContent(selectedTask.id)}> Save</button>
+        
       </div>
        <div className="flex justify-start mx-1 " style={{ marginBottom: '1rem' }}>
         <select onChange={(e)=>editor.chain().focus().setFontFamily(e.target.value).run()} className="text-white border-2 bg-blue-300 p-1 rounded-md text-xs m-1 border-blue-300 hover:bg-white hover:text-blue-300" >
@@ -273,8 +298,8 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
              
       </div>
       
-                <EditorContent className="outline-none border-none ProseMirror" editor={editor}/>
-
+                <EditorContent key={selectedTaskProp?.id} className="outline-none border-none ProseMirror my-2 p-1 overflow-y-scroll max-h-dvh" editor={editor} />
+                 <button className="text-white border-2  bg-blue-300 p-1 rounded-md text-sm m-1 w-fit border-blue-300 hover:bg-white hover:text-blue-300" onClick={()=>saveContent(selectedTaskProp.id)}> Save</button>
             </div> : ""}
             
             

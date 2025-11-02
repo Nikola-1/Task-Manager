@@ -56,7 +56,7 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
             ({ data, error } = await supabase
                     .from("tasks")
                     .select("*")
-                    .eq("category_id", category_id).eq("Completed","FALSE").eq("Deleted","FALSE"));
+                    .eq("category_id", category_id).eq("Completed","FALSE").eq("Deleted","FALSE").order("id", { ascending: true }));
         }
         if (error) {
                 console.error("Supabase error", error.message);
@@ -65,7 +65,7 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
                 setTasks(data || []);
             }
     };
-
+    
     useEffect(() => {
     
         fetchData();

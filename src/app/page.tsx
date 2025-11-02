@@ -1,6 +1,6 @@
 
 
-import Task from "./components/TaskComponent/Task";
+import Task from "./components/TaskComponent/TaskComponent";
 
 
 export default function Home() {
