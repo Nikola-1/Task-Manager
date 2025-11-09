@@ -5,9 +5,9 @@ import TaskMenu from "./TaskMenu/TaskMenu";
 import ListModal from "./ListModal/ListModal";
 import { useEffect, useState } from "react";
 import CalendarModal from "../CalendarModal/CalendarModal";
-
+import { useAuth } from "@/app/context/AuthContext";
 import useFilterTasks from "./hooks/useFilterTasks";
-import { Editor } from "@tiptap/core";
+
 //import { FilterType } from "./Types/FilterType";
 export default function TaskComponent(){
     const [toggleModalMenu,setToggleModalMenu] = useState(false); 
@@ -21,7 +21,7 @@ export default function TaskComponent(){
     //task menu treba da napravi informaciju za taskDisplay kako bi prikazao novu listu taskova 
         const [categoryId,setCategoryId] = useState(0);
     const { tasks, refresh } = useFilterTasks(Filter,null,categoryId);
-
+    const {user} =useAuth();
     const ShowData = async()=>{
             
            
@@ -31,12 +31,10 @@ export default function TaskComponent(){
     
     useEffect(()=>{
            ShowData();
-      
+       
           
     },[Filter,Tasks,tasks,categoryId,FilterImage])
-    useEffect(()=>{
-        setSelectedTask(null);
-    },[])
+    
    
     useEffect(()=>{
         setSelectedTask(null);

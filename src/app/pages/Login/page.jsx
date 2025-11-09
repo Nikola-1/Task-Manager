@@ -3,9 +3,9 @@
 import HabitsList from "@/app/components/HabitComponent/HabitList/HabitList";
 
 
-export default function HabitsPage(){
+export default function LoginPage(){
       return(
-        <HabitsList></HabitsList>
+        <LoginComponent></LoginComponent>
       )  
 
     

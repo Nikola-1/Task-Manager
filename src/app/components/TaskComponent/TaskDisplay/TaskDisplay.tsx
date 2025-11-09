@@ -40,10 +40,11 @@ interface TaskDisplayProps {
   }
 export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksArray,setTasksProp,refreshTasks,filter,filterImage,categoryId,setSelectedTaskProp,selectedTaskProp}:TaskDisplayProps){
   
-    
+     
     const {tasks,loading} = useFilterTasks("tasks",null,0);
     const [activeTask,setActiveTask] = useState<string | undefined>("");
-    const [activeButtonEditor,setActiveButtonEditor] = useState<boolean>(false);
+    const [DDL,setDDL] = useState<boolean>(false);
+    const FontArray:string[] = ['Montserrat','Roboto','Bebas Neue','Fascinate','Google Sans Code'];
      const editor = useEditor({
     extensions: [
       StarterKit,
@@ -57,29 +58,30 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
       FontFamily
     ],
     content: selectedTaskProp != null ? `${selectedTaskProp.content}` : `${Placeholder}`,
-      immediatelyRender: false,
+      immediatelyRender: false
     
   })
-  useEffect(() => {
-     
-  if (editor && selectedTaskProp && selectedTaskProp?.content) {
-    editor.commands.clearContent()
-    editor.commands.setContent(selectedTaskProp?.content);
-
-  }
-}, [selectedTaskProp, editor]);
 useEffect(() => {
+  if (!editor || !selectedTaskProp) return;
 
-  if (!selectedTaskProp || tasksArray.length === 0) return;
+  const currentHTML = editor.getHTML();
+  if (currentHTML !== selectedTaskProp.content) {
+    editor.commands.setContent(selectedTaskProp.content || "");
+  }
+}, [selectedTaskProp?.id]);
+// useEffect(() => {
 
-  const updated = tasksArray.find(t => t.id === selectedTaskProp.id);
+//   if (!selectedTaskProp || tasksArray.length === 0) return;
 
-  if (updated && updated.content !== selectedTaskProp.content) {
+//   const updated = tasksArray.find(t => t.id === selectedTaskProp.id);
+
+//   if (updated && updated.content !== selectedTaskProp.content) {
 
     
-    setSelectedTaskProp({...updated})
-  }
-}, [tasksArray]);
+//     setSelectedTaskProp({...updated})
+    
+//   }
+// }, [tasksArray]);
   
   //    useEffect(()=>{
  
@@ -89,24 +91,24 @@ useEffect(() => {
 
       
       
-      const {error} = await supabase.from('tasks').update({content:html}).eq("id",id);
-      
-
-       if (!error) {
+      const {data:updatedTask, error} = await supabase.from('tasks').update({content:html}).eq("id",id).select().single();
+     
+  
+       if (!error && updatedTask) {
   
     console.log("Uspeh")
   
-    
-      setTasksProp(tasks);
+    setTasksProp(prev => prev.map(t => (t.id === id ? updatedTask : t)));
+     setSelectedTaskProp(updatedTask);
       
-           editor?.commands.clearContent()
+      
     
      
-    await refreshTasks();
+     
         
     
   } else {
-    console.error("Save failed:", error.message);
+    console.error("Save failed:", error?.message);
     return;
   }
   }
@@ -114,7 +116,7 @@ useEffect(() => {
        const {data,error} = await supabase.from("tasks").select("*").order("id", { ascending: true });
     
        setTasksProp(data ?? []);
-   
+        
        
     }
     const deleteOneDeleted = async(id:number)=>{
@@ -132,17 +134,7 @@ useEffect(() => {
             
             return `${data?.image}`;
     }
-    const DeleteData = async (id:number)=>{
-        
-        const { error } = await supabase.from("tasks").update({Deleted:"TRUE"}).eq("id", id);
-  if (!error) {
-    setSelectedTaskProp(null);
-    refreshTasks(); // <<< ovo pokreće ponovni fetch iz hooka
-  } else {
-    console.error("Delete failed:", error.message);
-  }
-  
-    }
+   
     const updateStatus = async(id:number)=>{
         
         if(await supabase.from("tasks").select("*").eq("id",id).eq("Completed","FALSE")){
@@ -185,7 +177,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
      
          refreshTasks();
     },[])
-   
+    
 
     
     
@@ -257,7 +249,16 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
                     {
                         tasksArray.length != 0 ?
                     tasksArray?.map((item)=>( 
-                   <Task  refreshTasks={refreshTasks} setSelectedTask={setSelectedTaskProp} filter={filter} editor={editor} activeTask={activeTask} setActiveTask={setActiveTask}  key={item.id} id={item.id}></Task>
+                 <Task
+  key={item.id}
+  task={item}
+  selectedTask={selectedTaskProp}
+  
+  setSelectedTask={setSelectedTaskProp}
+  refreshTasks={refreshTasks}
+  filter={filter}
+  editor={editor}
+/>
                 )): <div className="flex justify-center align-middle items-center m-auto"><p className="flex justify-center align-middle items-center font-bold text-blue-900 ">No Tasks </p></div>
                 }
                  </div>
@@ -282,15 +283,16 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
         
       </div>
        <div className="flex justify-start mx-1 " style={{ marginBottom: '1rem' }}>
-        <select onChange={(e)=>editor.chain().focus().setFontFamily(e.target.value).run()} className="text-white border-2 bg-blue-300 p-1 rounded-md text-xs m-1 border-blue-300 hover:bg-white hover:text-blue-300" >
-         <option value={"Comic Sans MS"}>Comic Sans MS</option>
-            <option value={"Oswald"}>Oswald</option>
-               <option value={"Montserrat"}>Montserrat</option>
-               <option value={"Bebas Neue"}>Bebas Neue</option>
-            <option value={"Roboto"}>Roboto</option>
-            <option value={"Fascinate"}>Fascinate</option>
-               <option value={"Google Sans Code"}>Google Sans Code</option>
-        </select>
+        <div onClick={()=>setDDL(!DDL)} className="selectFontDDL text-white w-32 border-2 relative  bg-blue-300 p-1 rounded-md text-xs m-1 border-blue-300 hover:bg-white hover:text-blue-300 " >
+        
+        <p>{editor.getAttributes('textStyle').fontFamily != null ? editor.getAttributes('textStyle').fontFamily : "Select font"}</p>
+
+        <div className={DDL == true ? "h-fit transition-all w-full left-0 border-2  border-blue-300 rounded-md absolute z-10 bg-blue-300 text-white " : "h-0 border-blue-300 transition-all w-full rounded-md"  }>
+
+        {FontArray.map((item)=>  <div key={item} className={DDL == true ? "visible p-3 hover:bg-white transition-all rounded-md hover:text-blue-300" :" invisible transition-all "}  onClick={(e)=>editor.chain().focus().setFontFamily(item).run()}>{item}</div>)}
+          </div>
+           
+        </div>
           <div><p  className="text-white border-2 bg-blue-300 p-1 rounded-md text-xs m-1 border-blue-300 hover:bg-white hover:text-blue-300">  Comic Sans MS</p></div>
             <div><p   className="text-white border-2 bg-blue-300 p-1 rounded-md text-xs m-1 border-blue-300 hover:bg-white hover:text-blue-300">H2</p></div>
              <div><p  className="text-white border-2 bg-blue-300 p-1 rounded-md text-xs m-1 border-blue-300 hover:bg-white hover:text-blue-300">H3</p></div>

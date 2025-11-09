@@ -42,3 +42,11 @@
   font-style: italic;
   opacity: 0.6;
 }
+
+.selectFontDDL option{
+    border: none;
+    outline: none;
+}
+.selectFontDDL{
+  outline: none;
+}
