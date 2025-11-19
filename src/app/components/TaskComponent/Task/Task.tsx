@@ -58,7 +58,8 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
         selectedTask === task ? "bg-blue-400 rounded-md" : "hover:bg-blue-300 rounded-md"
       }`}>
       <div className="flex items-center ">
-        <input type="checkbox" className="m-1" onClick={() => updateStatus(task.id)} />
+        
+        <input  type="checkbox" className="m-1" onClick={() => updateStatus(task.id)} />
         <p>{task.name}</p>
         {task.category_id && <TaskCategoryImage id={task.category_id} />}
       </div>

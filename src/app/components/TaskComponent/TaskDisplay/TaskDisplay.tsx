@@ -20,6 +20,7 @@ import  {TextStyle,FontFamily}  from '@tiptap/extension-text-style'
 import Task from "../Task/Task";
 
 import { TaskType } from "../Types/TaskType";
+import { useAuth } from "@/app/context/AuthContext";
 
 
 interface TaskDisplayProps {
@@ -45,6 +46,7 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
     const [activeTask,setActiveTask] = useState<string | undefined>("");
     const [DDL,setDDL] = useState<boolean>(false);
     const FontArray:string[] = ['Montserrat','Roboto','Bebas Neue','Fascinate','Google Sans Code'];
+    const {user} =useAuth();
      const editor = useEditor({
     extensions: [
       StarterKit,
@@ -113,7 +115,7 @@ useEffect(() => {
   }
   }
     const ShowData = async()=>{
-       const {data,error} = await supabase.from("tasks").select("*").order("id", { ascending: true });
+       const {data,error} = await supabase.from("tasks").select("*").order("id", { ascending: true }).eq("user_id",user?.id);
     
        setTasksProp(data ?? []);
         
@@ -156,9 +158,9 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
         
       const { error } = categoryId != 0 ? await supabase
         .from('tasks')
-        .insert({  name: name,date:fullDate,category_id:categoryId }) : await supabase
+        .insert({  name: name,date:fullDate,category_id:categoryId,user_id:user?.id }) : await supabase
         .from('tasks')
-        .insert({  name: name,date:fullDate });
+        .insert({  name: name,date:fullDate,user_id:user?.id });
        
         if (!error) {
     refreshTasks(); // <<< ovo pokreće ponovni fetch iz hooka
@@ -174,7 +176,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
     const [menuButtonToggle,setMenuButtonToggle] = useState(Number);
     const [selectedDate,setSelectedDate] = useState('');
     useEffect(()=>{
-     
+      console.log(user);
          refreshTasks();
     },[])
     

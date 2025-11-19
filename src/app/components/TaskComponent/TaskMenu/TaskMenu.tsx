@@ -6,7 +6,7 @@ import SevenDays from "../../../../assets/img/7-days.png"
 import message from "../../../../assets/img/message-alert.png"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { faAngleDown, faAngleRight, faAnglesDown, faCheck, faMarker, faPlus, faSign, faTag, faTicket, faTicketAlt, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown, faAngleRight, faAnglesDown, faCheck, faEllipsis, faMarker, faPlus, faSign, faTag, faTicket, faTicketAlt, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { supabase } from "@/app/connection/supabaseclient";
 import React, { useState,useEffect, useMemo } from "react"
@@ -14,6 +14,9 @@ import "./TaskMenu.css";
 import { faCheckSquare } from "@fortawesome/free-solid-svg-icons/faCheckSquare"
 //import { FilterType } from "../Types/FilterType"
 import useFilterTasks from "../hooks/useFilterTasks"
+import { useAuth } from "@/app/context/AuthContext"
+import useOptionsMenu from "../hooks/useOptionsMenu"
+import { OptionsMenu } from "../../OptionsMenu/OptionsMenu"
 
 interface TaskMenuProps {
     setToggleModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -24,17 +27,26 @@ interface TaskMenuProps {
     setCategoryId: React.Dispatch<React.SetStateAction<number>>;
     setFilterImage: React.Dispatch<React.SetStateAction<string>>;
     setSelectedTask: React.Dispatch<React.SetStateAction<object | null>>;
-    
+    refreshFlag:boolean;
   }
   
-export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage,setSelectedTask }: TaskMenuProps){
+export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage,setSelectedTask }: TaskMenuProps){
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [categories,setCategories] = useState<any[]>([]);
     const [visibleTags,setVisibleTags] = useState(false);
     const [Filter, setFilter] = useState<string>("tasks");
+    const {user} = useAuth();
+    const [X,setX] = useState<number>(0);
+    const [Y,setY] = useState<number>(0);
+    const { open, toggleMenu,setOpen, options } = useOptionsMenu("task", {
+   
+    "Mark as Complete": () => console.log('Radi Mark as Complete'),
+    "Move to List": () => console.log('Radi Move to List'),
+  });
+  const closeMenu = ()=> setOpen(false);
     const ShowData = async()=>{
-        const {data,error} = await supabase.from("Categories").select('*');
-    
+        const {data,error} = await supabase.from("Categories").select('*').eq('user_id',user?.id);
+        
        setCategories(data ?? []);
        
     }
@@ -53,11 +65,25 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
         ShowData()
       
     },[])
+      useEffect(() => {
+    console.log("TaskList rerender triggered!");
+    console.log(categories);
+    ShowData();
+    console.log(categories);
     
+  }, [refreshFlag]);
+  useEffect(()=>{
+    console.log(X,Y);
+  },[X,Y])
     return(
-        <div className="Task-menu border-blue-300 md:border-r-2 md:border-l-2 md:w-1/4" id="TaskMenu">
+        <div onClick={(e) => {
+            if(open != true){
+                setX(e.clientX);
+                      setY(e.clientY);
+            }
+            }} className="Task-menu relative  border-blue-300 md:border-r-2 md:border-l-2 md:w-1/4" id="TaskMenu">
            
-        <div className="task-menu-wrapper  w-full   md:h-screen    ">
+        <div className="task-menu-wrapper   w-full   md:h-screen    ">
         <FontAwesomeIcon icon={faAnglesDown} onClick={()=>{
             // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             toggle ? setToggle(false) : setToggle(true);
@@ -94,24 +120,24 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
             
                 
             </div>
-            <div className="Task-list ">
-                <div className="flex items-center justify-between ">
-                    <div className="flex">
+            <div className="Task-list    ">
+                <div className="flex items-center   justify-between ">
+                    <div className="flex ">
                 <h5 className="text-blue-900 font-bold m-3 p-0.5">List</h5>
-                <p className="bg-blue-300 w-fit m-3 p-0.5 text-blue-900">Used: 3/9</p>
+                <p className="bg-blue-300 w-fit m-3 p-0.5 text-blue-900 rounded-md">Used: 3/9</p>
                 </div>
                 <FontAwesomeIcon onClick={()=> setToggleModal(!ToggleModal)} className="pr-3 hover:cursor-pointer text-blue-900" icon={faPlus} width={20} height={20}></FontAwesomeIcon>
                 </div>
-                <ul className=" p-3">
-                {categories.map((cat,i)=> <li onClick={async ()=>{
+                <ul className="max-h-[calc(3*3.5rem)]  overflow-y-scroll    p-3 ">
+                {categories.map((cat,i)=> <li onClick={async (e)=>{
                     setMenuButtonToggle(i);
                       setCategoryId(cat.id);
                       setSelectedTask(null);
                       
                         setTaskFilter(cat.name);
                         setFilterImage(cat.image)
-                    }} key={i} className={menuButtonToggle == i ? "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >
-                        <div className=" group-[]:translate-x-3 transition-all  flex flex-row align-middle items-center "><img src={"../img/"+cat.image+".png"} width={20} height={10} alt="Calendar with number on it"></img> <p className="m-2">{cat.name}</p> </div> <p>3</p>
+                    }} key={i} className={menuButtonToggle == i ? " grid-cols-1 group  h-fit background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >
+                        <div className=" group-[]:translate-x-3  transition-all  flex flex-row align-middle items-center "><img src={"../img/"+cat.image+".png"} width={20} height={10} alt="Calendar with number on it"></img> <p className="m-2">{cat.name}</p> </div> <div className="flex align-middle items-center"><p className="p-2">3</p><FontAwesomeIcon onClick={toggleMenu} icon={faEllipsis} className="cursor-pointer"></FontAwesomeIcon></div>
                     </li>)}
                 
                 </ul>
@@ -156,6 +182,7 @@ export default function TaskMenu({ ToggleModal,setToggleModal,setTaskFilter,Task
                 <p className="px-2">Deleted</p>
                 </div>
         </div>
+        <OptionsMenu open={open} options={options} x={X} y={Y} closeMenu={closeMenu} />
     </div>
     )
 }

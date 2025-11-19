@@ -10,6 +10,11 @@ import useFilterTasks from "./hooks/useFilterTasks";
 
 //import { FilterType } from "./Types/FilterType";
 export default function TaskComponent(){
+    const [refreshFlag,setRefreshFlag] = useState(false);
+    const triggerRender = ()=>{
+        console.log('pera');
+        setRefreshFlag(prev => !prev);
+    }
     const [toggleModalMenu,setToggleModalMenu] = useState(false); 
     const [toggleModalCalendar,setToggleModalCalendar] = useState(false); 
     const [selectedDate,setSelectedDate] = useState<Date | null>(new Date());
@@ -43,9 +48,9 @@ export default function TaskComponent(){
     return(
        <div className="flex md:flex-row flex-col w-full ">
           
-        <TaskMenu setSelectedTask={setSelectedTask}  setFilterImage={setFilterImage} setCategoryId={setCategoryId} categoryId={categoryId} setToggleModal={setToggleModalMenu} setTaskFilter={setFilter} ToggleModal={toggleModalMenu} TaskFilter={Filter}></TaskMenu>
+        <TaskMenu refreshFlag={refreshFlag}  setSelectedTask={setSelectedTask}  setFilterImage={setFilterImage} setCategoryId={setCategoryId} categoryId={categoryId} setToggleModal={setToggleModalMenu} setTaskFilter={setFilter} ToggleModal={toggleModalMenu} TaskFilter={Filter}></TaskMenu>
         <TaskDisplay selectedTaskProp={selectedTask}  setSelectedTaskProp={setSelectedTask} categoryId={categoryId} filterImage={FilterImage} filter={Filter}   refreshTasks={refresh} tasksArray={Tasks} setTasksProp={setTasks} fullDate={selectedDate} setFullDate={setSelectedDate} ToggleModal={toggleModalCalendar} setToggleModal={setToggleModalCalendar}></TaskDisplay>
-        <ListModal isActive={toggleModalMenu} setActive={setToggleModalMenu}></ListModal>
+        <ListModal  onUpdate={triggerRender}  isActive={toggleModalMenu} setActive={setToggleModalMenu}></ListModal>
        
         <CalendarModal setDate={setSelectedDate} DateInherited={selectedDate}  isActive={toggleModalCalendar} setActive={setToggleModalCalendar}></CalendarModal>
         
