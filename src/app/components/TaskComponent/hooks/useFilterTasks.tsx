@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 //import { FilterType } from "../Types/FilterType";
 
 export default function useFilterTasks(filter: string,isCategory:boolean | null,category_id:number) {
-    const [tasks, setTasks] = useState<any[]>([]); //
+    const [tasks, setTasks] = useState<any[]>([]); 
     const [loading, setLoading] = useState(true);
     const {user} = useAuth();
     const fetchData = async () => {
@@ -25,14 +25,14 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
                 ({ data, error } = await supabase
                     .from("tasks")
                     .select("*")
-                    .eq("date", new Date().toISOString().split("T")[0]).eq("Completed",false).eq("Deleted",false).eq("user_id",user?.id));
+                    .eq("date", new Date().toISOString().split("T")[0]).eq("Deleted",false).eq("user_id",user?.id));
             } else if (filter === "7Days") {
                 const date = new Date();
         
                 ({ data, error } = await supabase
                     .from("tasks")
                     .select("*").gte("date",new Date().toISOString().split("T")[0])
-                    .lte("date", new Date(date.setDate(date.getDate()+7)).toISOString().split("T")[0]).eq("Completed",false).eq("Deleted",false).eq("user_id",user?.id));
+                    .lte("date", new Date(date.setDate(date.getDate()+7)).toISOString().split("T")[0]).eq("Deleted",false).eq("user_id",user?.id));
             }
             else if(filter === "Completed"){
                  ({ data, error } = await supabase.from(table).select("*").eq("Completed",true).eq("Deleted",false).eq("user_id",user?.id));
@@ -41,7 +41,7 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
                  ({ data, error } = await supabase.from(table).select("*").eq("Deleted",true).eq("user_id",user?.id));
             }
              else {
-                ({ data, error } = await supabase.from(table).select("*").eq("Completed",false).eq("user_id",user?.id));
+                ({ data, error } = await supabase.from(table).select("*").eq("user_id",user?.id));
             }
 
             
@@ -57,7 +57,7 @@ export default function useFilterTasks(filter: string,isCategory:boolean | null,
             ({ data, error } = await supabase
                     .from("tasks")
                     .select("*")
-                    .eq("category_id", category_id).eq("Completed","FALSE").eq("Deleted","FALSE").order("id", { ascending: true }).eq("user_id",user?.id));
+                    .eq("category_id", category_id).eq("Deleted","FALSE").order("id", { ascending: true }).eq("user_id",user?.id));
         }
         if (error) {
                 console.error("Supabase error", error.message);

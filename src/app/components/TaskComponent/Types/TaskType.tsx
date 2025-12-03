@@ -4,6 +4,6 @@ export interface TaskType { //napravim tip za Task
   content: string | null;
   date: string | null;
   category_id: number | null;
-  Deleted: 'TRUE' | 'FALSE';
-  Completed: 'TRUE' | 'FALSE';
+  Deleted: boolean;
+  Completed: boolean;
 }

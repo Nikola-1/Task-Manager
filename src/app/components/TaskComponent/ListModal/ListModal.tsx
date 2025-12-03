@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import SmileModal from "../../SmileModalComponent/SmileModal";
 import { supabase } from "@/app/connection/supabaseclient";
 import { useAuth } from "@/app/context/AuthContext";
+import { randInt } from "three/src/math/MathUtils.js";
 
 
 interface ModalProps{
@@ -17,6 +18,7 @@ export default function ListModal({isActive,setActive,onUpdate}: ModalProps){
     const [toggleModalCalendar,setToggleModalCalendar] = useState(false); 
     const [nameCategory,setnameCategory] = useState<string>("");
     const [ActiveSticker,setActiveSticker] = useState<object | null>();
+    const [picture,setPicture] = useState<object>();
     const {user} = useAuth();
 
       const handleSave = () => {
@@ -30,11 +32,25 @@ export default function ListModal({isActive,setActive,onUpdate}: ModalProps){
             
         }
         else{
-            console.log('uspesno dodato');
+            
             handleSave();
         }
     }
+    async function GetPicture(){
+       const {data,error} = await supabase.from("ModalPictures").select("*");
     
+       if(!error){
+            setPicture(data[randInt(0,data.length-1)]);
+            
+       }
+       else{
+        console.log(error.message);
+       }
+    }
+    useEffect(()=>{
+        GetPicture();
+      
+    },[])
     return(
         <div className={isActive == true ? "flex absolute w-8/12 translate-x-1/4  top-2/4 left-0 shadow-md rounded-md bg-white  bottom-2/4 m-auto h-2/4  " : " hidden"} >
         <div className=" inset-0 flex items-center align-middle justify-center w-full">
@@ -66,6 +82,7 @@ export default function ListModal({isActive,setActive,onUpdate}: ModalProps){
             <div onClick={()=>{
                 setActive(!isActive);
                 setActiveSticker(null);
+                GetPicture();
             } } className="hover:bg-blue-300  hover:text-white hover:cursor-pointer float-right absolute bottom-0 p-2 m-1 border-2 text-blue-300 border-blue-300 rounded-md ">
                 <p className="">Close</p>
             </div>
@@ -76,7 +93,9 @@ export default function ListModal({isActive,setActive,onUpdate}: ModalProps){
                 <p className="">Add</p>
             </div>
         </div>
-            <div className="w-2/4 h-full bg-blue-800 rounded-r-md"></div>
+            <div className="w-2/4 h-full rounded-r-md">
+                    <Image src={"/img/" + picture?.picture_path + ".jpg"} alt={""} width={840} height={840}  className="w-full h-full rounded-md" />
+            </div>
           
         </div>
         </div>

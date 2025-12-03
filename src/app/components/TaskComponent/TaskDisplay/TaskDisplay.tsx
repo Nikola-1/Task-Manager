@@ -3,7 +3,7 @@
  'use client'
  import "./style.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendar, faClose, faEarListen, faEllipsis, faNoteSticky, faSadCry, faTrash, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+import { faCalendar, faCheck, faCheckSquare, faClose, faColumns, faDisplay, faEarListen, faEllipsis, faNoteSticky, faSadCry, faTrash, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import Placeholder from '@tiptap/extension-placeholder'
@@ -21,6 +21,8 @@ import Task from "../Task/Task";
 
 import { TaskType } from "../Types/TaskType";
 import { useAuth } from "@/app/context/AuthContext";
+import useOptionsMenu from "../hooks/useOptionsMenu";
+import { OptionsMenu } from "../../OptionsMenu/OptionsMenu";
 
 
 interface TaskDisplayProps {
@@ -46,7 +48,9 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
     const [activeTask,setActiveTask] = useState<string | undefined>("");
     const [DDL,setDDL] = useState<boolean>(false);
     const FontArray:string[] = ['Montserrat','Roboto','Bebas Neue','Fascinate','Google Sans Code'];
-    const {user} =useAuth();
+    const [X,setX] = useState<number | undefined>();
+    const [Y,setY] = useState<number | undefined>();
+    const {user,setUser} =useAuth();
      const editor = useEditor({
     extensions: [
       StarterKit,
@@ -63,6 +67,7 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
       immediatelyRender: false
     
   })
+   
 useEffect(() => {
   if (!editor || !selectedTaskProp) return;
 
@@ -87,7 +92,13 @@ useEffect(() => {
   
   //    useEffect(()=>{
  
-  
+  const setUserAfterDisplay = async()=>{
+        const {data,error} = await supabase.from("Users").select("*").eq("id",user?.id).single();
+        
+        setUser(data);
+        console.log(user);
+        
+  }
   const saveContent = async(id:number)=>{
       const html = editor?.getHTML() || "";
 
@@ -172,12 +183,23 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
     const handleCloseModal = () => {
         setToggleModal(false); // Zatvaranje modala
       };
+       const { open, toggleMenu,setOpen, options,id,setId } = useOptionsMenu("task", {
+           
+            complete:{
+                label:user?.display==false ? "Display Tasks:Column" : "Display Tasks:Row",
+                icon:faColumns,
+                action:async ()=>{ await supabase.rpc("toggle_display_tasks", { uid: user?.id }); setUserAfterDisplay();  }
+            },
+           
+            
+          });
     const [toggle,setToggle] = useState(true);
     const [menuButtonToggle,setMenuButtonToggle] = useState(Number);
     const [selectedDate,setSelectedDate] = useState('');
     useEffect(()=>{
       console.log(user);
          refreshTasks();
+         
     },[])
     
 
@@ -218,7 +240,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
             <div  className="task-list h-full  w-full md:w-2/4 md:border-r-2  flex flex-col ">
             <div className="flex justify-between h-fit items-center p-3">
                     <h3 className="pr-3 pl-3 flex align-middle items-center ">{filter}{ filterImage == "" ? <p></p> : <img width={20} height={20} className="mx-2" src={"../img/"+filterImage+".png"}/>}</h3>
-                    <FontAwesomeIcon className="cursor-pointer text-2xl" icon={faEllipsis}></FontAwesomeIcon>
+                    <FontAwesomeIcon className="cursor-pointer text-2xl" icon={faEllipsis} onClick={(e)=>{toggleMenu(); setX(e.clientX); setY(e.clientY);}}></FontAwesomeIcon>
                     </div>
                     <div className="relative flex justify-between text-white items-center m-3 p-1 bg-blue-300  rounded-md z-0 group">
                        
@@ -247,7 +269,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
                     {filter == "Deleted" ?  <div className="flex justify-center  mx-auto m-3 w-9/12 h-fit bg-blue-400 font-bold text-white rounded-md cursor-pointer" onClick={deleteDeleted}>Delete</div> : <></>}
                     
 
-                 <div className=" overflow-y-scroll h-96">
+                 <div className={user?.display == 1  ? "grid grid-cols-2 overflow-y-scroll" : " overflow-y-scroll h-96"}>
                     {
                         tasksArray.length != 0 ?
                     tasksArray?.map((item)=>( 
@@ -307,7 +329,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
             </div> : ""}
             
             
-           
+           <OptionsMenu options={options} open={open} closeMenu={()=>setOpen(!open)} x={X} y={Y} />
         </div>
         
     )

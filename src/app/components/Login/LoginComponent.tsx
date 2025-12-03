@@ -7,6 +7,9 @@ import React, { useState } from 'react'
 import "./style.css";
 import { supabase } from '@/app/connection/supabaseclient';
 import { useAuth } from '@/app/context/AuthContext';
+import "./Login.css";
+import 'swiper/css';
+
 const Micro = Micro_5({weight:"400",subsets:['latin'],});
  interface LoginProps{
     setLoginProps:React.Dispatch<React.SetStateAction<boolean>>
@@ -19,7 +22,7 @@ export default function  LoginComponent({setLoginProps,setUserProps}:LoginProps)
      const [Email,setEmail] = useState<string>();
       const [Password,setPassword] = useState<string>();
       const [RepeatedPassword,setRepeatedPassword] = useState<string>();
-
+        
       const [singUp,setSignUp] = useState<boolean>(false);
       const {setUser} = useAuth();
   async function Register(){
@@ -57,7 +60,13 @@ export default function  LoginComponent({setLoginProps,setUserProps}:LoginProps)
           }
   }
   return (
-    <div className='flex justify-between items-center w-full h-dvh'>
+    <div className='flex gri justify-between items-center w-full h-dvh'>
+      
+      
+    
+
+       
+     <Image className='SlikaLogin m-auto m-3 flex justify-center align-middle items-center w-full h-full  shadow-md ' src={"/img/LoginImage3.jpg"} width={1240} height={940} alt='pera'></Image>
       <div>
 
         <div className='grid'></div>

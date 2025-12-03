@@ -38,10 +38,14 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
     const {user} = useAuth();
     const [X,setX] = useState<number>(0);
     const [Y,setY] = useState<number>(0);
-    const { open, toggleMenu,setOpen, options } = useOptionsMenu("task", {
+    const { open, toggleMenu,setOpen, options,id,setId } = useOptionsMenu("task", {
    
-    "Mark as Complete": () => console.log('Radi Mark as Complete'),
-    "Move to List": () => console.log('Radi Move to List'),
+    
+    Delete:{
+        label:"Delete",
+        icon:faTrash,
+        action:async ()=> {await supabase.from("Categories").delete().eq("id",id); ShowData(); setOpen(false);}, 
+    }
   });
   const closeMenu = ()=> setOpen(false);
     const ShowData = async()=>{
@@ -52,10 +56,10 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
     }
     
     const handleOpenModal = ()=>{
-        setToggleModal(true);
+        setToggleModal(true); //Opening modal
     }
     const handleCloseModal = () => {
-        setToggleModal(false); // Zatvaranje modala
+        setToggleModal(false); // Closing modal
       };
      
     const [toggle,setToggle] = useState(true);
@@ -66,12 +70,11 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
       
     },[])
       useEffect(() => {
-    console.log("TaskList rerender triggered!");
-    console.log(categories);
+   
     ShowData();
-    console.log(categories);
-    
-  }, [refreshFlag]);
+  
+    //when something changes in other Component show data again
+  }, [refreshFlag,id]);
   useEffect(()=>{
     console.log(X,Y);
   },[X,Y])
@@ -137,7 +140,8 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                         setTaskFilter(cat.name);
                         setFilterImage(cat.image)
                     }} key={i} className={menuButtonToggle == i ? " grid-cols-1 group  h-fit background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >
-                        <div className=" group-[]:translate-x-3  transition-all  flex flex-row align-middle items-center "><img src={"../img/"+cat.image+".png"} width={20} height={10} alt="Calendar with number on it"></img> <p className="m-2">{cat.name}</p> </div> <div className="flex align-middle items-center"><p className="p-2">3</p><FontAwesomeIcon onClick={toggleMenu} icon={faEllipsis} className="cursor-pointer"></FontAwesomeIcon></div>
+                        <div className=" group-[]:translate-x-3  transition-all  flex flex-row align-middle items-center "><img src={"../img/"+cat.image+".png"} width={20} height={10} alt="Calendar with number on it"></img> <p className="m-2">{cat.name}</p> </div> <div className="flex align-middle items-center"><p className="p-2">3</p><FontAwesomeIcon onClick={()=>{
+                            toggleMenu(); setId(cat.id)}} icon={faEllipsis} className="cursor-pointer"></FontAwesomeIcon></div>
                     </li>)}
                 
                 </ul>
