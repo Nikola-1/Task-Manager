@@ -6,4 +6,6 @@ export interface TaskType { //napravim tip za Task
   category_id: number | null;
   Deleted: boolean;
   Completed: boolean;
+  file_name:string;
+  folder_name:string;
 }

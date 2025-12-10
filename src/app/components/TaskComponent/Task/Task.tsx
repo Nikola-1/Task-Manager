@@ -2,30 +2,46 @@ import { supabase } from '@/app/connection/supabaseclient';
 //import React, {  useEffect, useState } from 'react'
 import { Editor } from '@tiptap/core';
 import TaskCategoryImage from '../TaskDisplay/TaskCategoryImage';
-import { faCheckSquare, faClose, faEllipsis, faFlag, faSquareCheck, faTag, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCheckSquare, faClose, faDownload, faEllipsis, faFile, faFileAlt, faFlag, faSquareCheck, faTag, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TaskType } from '../Types/TaskType';
 import useOptionsMenu from '../hooks/useOptionsMenu';
 import { OptionsMenu } from '../../OptionsMenu/OptionsMenu';
-import {  useState } from 'react';
+import {  useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 export interface TaskProps {
   task: TaskType;
   selectedTask: TaskType | null;
-  
+  refreshFlag:boolean;
   filter: string;
   setSelectedTask: React.Dispatch<React.SetStateAction<TaskType | null>>;
   refreshTasks: () => Promise<void>;
   editor: Editor;
   
 }
-export default function Task({ task, filter, setSelectedTask, selectedTask, refreshTasks }: TaskProps) {
+export default function Task({ task, filter, setSelectedTask, selectedTask, refreshTasks,refreshFlag }: TaskProps) {
   const updateStatus = async (id: number) => {
     const { error } = await supabase.from("tasks").update({ Completed: !task.Completed }).eq("id", id);
     if (!error) refreshTasks();
 
     
   };
+  const Download = async () => {
+      const {data,error} = await supabase.storage.from("FileBucket").download(`${task.folder_name}/${task.file_name}`);
+
+      if(error){
+        console.log(error);
+      }
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href= url;
+      a.download = task.file_name;
+      a.click();
+      URL.revokeObjectURL(url);
+  }
+  
+
+  const fileInput = useRef<HTMLInputElement>(null);
    const {user} = useAuth();
   const { open, toggleMenu,setOpen, options } = useOptionsMenu("", {
      
@@ -44,6 +60,35 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
                 icon:faFlag,
                 action:()=>{console.log("mark")}
             },
+            File:{
+                label:task.file_name != null ? "Change file" : "Add file",
+                icon:faFile,
+                action:async ()=>{
+                 
+                  
+                  fileInput.current.onchange = async (e) => {
+                    
+      const file = e.target.files[0];
+      if (!file) {
+        console.log("User zatvorio File Explorer bez izbora fajla");
+        return;
+      }
+      
+                  
+                    
+                  
+
+
+                   const {data,error} = await supabase.storage.from("FileBucket").upload(`user-${user?.id}/${file.name}`,file); 
+                   
+                  const {data2,error2} = await supabase.from("tasks").update({folder_name:`user-${user?.id}`}).eq("id",task.id).eq("user_id",user?.id);
+                  const {data3,error3} = await supabase.from("tasks").update({file_name:file.name}).eq("id",task.id).eq("user_id",user?.id);
+    }
+    fileInput.current?.click();
+                  
+                  }
+                  
+            },
              ...(filter === "Completed" && {
        undo: {
       label: "Undo complete",
@@ -53,7 +98,7 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
   })
       
     });
- 
+    
   function DateExpression(item: any) {
     switch (new Date(item).getDate() - new Date().getDate()) {
       case 0: return "Today";
@@ -80,7 +125,16 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
   
     }
     const closeMenu = ()=> setOpen(false);
-   
+   useEffect(() => {
+            
+             
+
+             
+           }, [refreshFlag]);
+
+           useEffect(()=>{
+            console.log(task);
+           },[])
   return (
     <div
       
@@ -93,11 +147,27 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
       }} className={` flex justify-between w-full items-center text-blue-900 transition-all p-3 cursor-pointer ${
         selectedTask === task ? "bg-blue-400 rounded-md" : "hover:bg-blue-300 rounded-md"
       } ${task.Completed == true ? `opacity-50 bg-blue-300` : ``}`}>
-      <div className={`flex items-center ${user?.display == false ? "" : "p-5 "}`}>
+      <div className={`flex items-center align-top ${user?.display == false ? "" : "p-5 "}`}>
         {/*filter == "Completed" ?  <input checked={task.Completed}  type="checkbox" className="m-1" onChange={() => updateStatus(task.id)} /> :  <input  type="checkbox" className="m-1" onChange={() => updateStatus(task.id)} />*/}
-        <input checked={task.Completed}  type="checkbox" className="m-1" onChange={() => updateStatus(task.id)} />
+        
+        <div className='flex flex-col'>
+          <div className='flex'>
+            <div className='flex'>
+            <input checked={task.Completed}  type="checkbox" className="m-1" onChange={() => updateStatus(task.id)} />
         <p>{task.name}</p>
-        {task.category_id && <TaskCategoryImage id={task.category_id} />}
+        </div>
+         {task.category_id && <TaskCategoryImage id={task.category_id} refreshFlag={refreshFlag} />}
+         </div>
+         {task.file_name != null ?
+         <div className='flex'>
+         <p className='p-2'></p>
+         <p className='bg-teal-900 text-white text-xs rounded-md p-1'>{task.file_name}</p> 
+           <p className='bg-blue-800 text-white text-xs rounded-md p-1 mx-1'><button onClick={Download}><FontAwesomeIcon  icon={faDownload}/></button></p> 
+        </div>
+         : ""} 
+        </div>
+       
+       
       </div>
       <div className='flex items-center'>
       <div className="flex items-center">
@@ -126,8 +196,9 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
           }
             }
           className="cursor-pointer invisible  group-hover:visible m-1 size-3"
-
+           
         />
+         <input type='file' ref={fileInput} className="hidden " />
         <OptionsMenu open={open} options={options} x={X} y={Y} closeMenu={closeMenu} />
     </div>
   );

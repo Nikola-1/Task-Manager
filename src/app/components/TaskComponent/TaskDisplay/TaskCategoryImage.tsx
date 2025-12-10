@@ -6,16 +6,17 @@ import { useEffect, useState } from "react";
 interface TaskCategoryImageProps{
                
                 id:number
+                refreshFlag:boolean
 }
-export default function TaskCategoryImage({id}:TaskCategoryImageProps){
+export default function TaskCategoryImage({id,refreshFlag}:TaskCategoryImageProps){
            const [imageUrl,setImageUrl] = useState<string | null>(null);
             useEffect(()=>{
                 async function  getImage(){
                    
-                const {data,error} = await supabase.from("Categories").select("image").eq('id',id).single();
+                const {data,error} = await supabase.from("Categories").select("Stickers(sticker_path)").eq('id',id).single();
 
                 if(!error && data){
-                    setImageUrl(data.image)
+                    setImageUrl(data.Stickers.sticker_path)
                 }
                 else{
                     return;
@@ -23,7 +24,7 @@ export default function TaskCategoryImage({id}:TaskCategoryImageProps){
                 
             }
             getImage();
-            },[id])
+            },[id,refreshFlag])
            
     return(
       

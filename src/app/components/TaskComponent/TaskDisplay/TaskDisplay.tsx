@@ -3,7 +3,7 @@
  'use client'
  import "./style.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendar, faCheck, faCheckSquare, faClose, faColumns, faDisplay, faEarListen, faEllipsis, faNoteSticky, faSadCry, faTrash, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+import { faCalendar, faCheck, faCheckSquare, faClose, faColumns, faDisplay, faEarListen, faEllipsis, faLeftLong, faListSquares, faNoteSticky, faSadCry, faTrash, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import Placeholder from '@tiptap/extension-placeholder'
@@ -37,20 +37,38 @@ interface TaskDisplayProps {
    filter: string
    filterImage:string
    categoryId:number
-   
+   refreshFlag:boolean;
    setSelectedTaskProp: React.Dispatch<React.SetStateAction<TaskType | null>>
    selectedTaskProp:TaskType | null
+   setSideMenuVisible:React.Dispatch<React.SetStateAction<boolean>>
+   SideMenuVisible:boolean;
   }
-export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksArray,setTasksProp,refreshTasks,filter,filterImage,categoryId,setSelectedTaskProp,selectedTaskProp}:TaskDisplayProps){
+export default function TaskDisplay({
+  setToggleModal,
+  fullDate,
+  setFullDate,
+  tasksArray,
+  setTasksProp,
+  refreshTasks,
+  filter,
+  filterImage,
+  refreshFlag,
+  categoryId,
+  setSelectedTaskProp,
+  selectedTaskProp,
+  SideMenuVisible,
+  setSideMenuVisible
+}:TaskDisplayProps){
   
      
-    const {tasks,loading} = useFilterTasks("tasks",null,0);
+   
     const [activeTask,setActiveTask] = useState<string | undefined>("");
     const [DDL,setDDL] = useState<boolean>(false);
     const FontArray:string[] = ['Montserrat','Roboto','Bebas Neue','Fascinate','Google Sans Code'];
     const [X,setX] = useState<number | undefined>();
     const [Y,setY] = useState<number | undefined>();
     const {user,setUser} =useAuth();
+    
      const editor = useEditor({
     extensions: [
       StarterKit,
@@ -70,7 +88,7 @@ export default function TaskDisplay({setToggleModal,fullDate,setFullDate,tasksAr
    
 useEffect(() => {
   if (!editor || !selectedTaskProp) return;
-
+  
   const currentHTML = editor.getHTML();
   if (currentHTML !== selectedTaskProp.content) {
     editor.commands.setContent(selectedTaskProp.content || "");
@@ -111,7 +129,7 @@ useEffect(() => {
   
     console.log("Uspeh")
   
-    setTasksProp(prev => prev.map(t => (t.id === id ? updatedTask : t)));
+    refreshTasks();
      setSelectedTaskProp(updatedTask);
       
       
@@ -125,13 +143,7 @@ useEffect(() => {
     return;
   }
   }
-    const ShowData = async()=>{
-       const {data,error} = await supabase.from("tasks").select("*").order("id", { ascending: true }).eq("user_id",user?.id);
-    
-       setTasksProp(data ?? []);
-        
-       
-    }
+   
     const deleteOneDeleted = async(id:number)=>{
         await supabase.from("tasks").delete().eq("id",id);
         setSelectedTaskProp(null);
@@ -142,11 +154,7 @@ useEffect(() => {
        tasksArray.forEach(async (e)=>await supabase.from("tasks").delete().eq("id", e.id));
        refreshTasks();
     }
-    const CategoryImage = async(id:number)=>{
-            const {data,error} = await supabase.from("Categories").select("image").eq("category_id",id).single();
-            
-            return `${data?.image}`;
-    }
+    
    
     const updateStatus = async(id:number)=>{
         
@@ -167,14 +175,25 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
     }
     const AddTask = async (name:string,fullDate:Date,categoryId?:number) =>{
         
-      const { error } = categoryId != 0 ? await supabase
+      const { data:TaskData,error } = categoryId != 0 ? await supabase
         .from('tasks')
-        .insert({  name: name,date:fullDate,category_id:categoryId,user_id:user?.id }) : await supabase
+        .insert({  name: name,date:fullDate,category_id:categoryId,user_id:user?.id }).select("*") : await supabase
         .from('tasks')
-        .insert({  name: name,date:fullDate,user_id:user?.id });
+        .insert({  name: name,date:fullDate,user_id:user?.id }).select("*");
        
         if (!error) {
-    refreshTasks(); // <<< ovo pokreće ponovni fetch iz hooka
+      
+          const {data:userTaskData,error:errorUsersTask} = await supabase.from("Users_Tasks").insert({"User_id":user?.id,"Task_id":TaskData[0].id}).select("*");
+
+          if(errorUsersTask){
+            console.log(userTaskData);
+            console.log(error);
+          }
+          else{
+            console.log(userTaskData);
+            refreshTasks(); 
+          }
+    
   } else {
     console.error("Delete failed:", error.message);
   }
@@ -198,8 +217,9 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
     const [selectedDate,setSelectedDate] = useState('');
     useEffect(()=>{
       console.log(user);
+      console.log(tasksArray);
          refreshTasks();
-         
+            
     },[])
     
 
@@ -230,6 +250,13 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
             }
           }, [editor])
           
+            useEffect(() => {
+           
+             refreshTasks();
+            
+             
+           }, [refreshFlag]);
+
           if (!editor) return null;
      
          
@@ -237,9 +264,13 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
         
         <div className="w-full flex h-full   ">
             
-            <div  className="task-list h-full  w-full md:w-2/4 md:border-r-2  flex flex-col ">
+            <div  className={`task-list h-full relative w-full md:w-2/4 md:border-r-2  flex flex-col transition-all duration-700 ease-in-out ${SideMenuVisible ? "right-1" : ""}`}>
             <div className="flex justify-between h-fit items-center p-3">
+              <div className="flex items-center">
+                <FontAwesomeIcon icon={faLeftLong} onClick={()=>setSideMenuVisible(!SideMenuVisible)} className={`transition-all cursor-pointer ${SideMenuVisible ? "rotate-180 " : "rotate-0 transition-all"}`}/>
+                
                     <h3 className="pr-3 pl-3 flex align-middle items-center ">{filter}{ filterImage == "" ? <p></p> : <img width={20} height={20} className="mx-2" src={"../img/"+filterImage+".png"}/>}</h3>
+                    </div>
                     <FontAwesomeIcon className="cursor-pointer text-2xl" icon={faEllipsis} onClick={(e)=>{toggleMenu(); setX(e.clientX); setY(e.clientY);}}></FontAwesomeIcon>
                     </div>
                     <div className="relative flex justify-between text-white items-center m-3 p-1 bg-blue-300  rounded-md z-0 group">
@@ -248,7 +279,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
                         <input className="absolute z-20 bg-transparent outline-none group-focus-within:outline-none placeholder-white" onChange={handleChange} onKeyDown={(e)=>{
                             if(e.key === "Enter" && inputValue != "" && inputValue != " "){
                                 AddTask(inputValue,fullDate,categoryId);
-                                ShowData();
+                                
                             }
                        
                         }} placeholder={inputValue}></input>
@@ -271,13 +302,14 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
 
                  <div className={user?.display == 1  ? "grid grid-cols-2 overflow-y-scroll" : " overflow-y-scroll h-96"}>
                     {
+                      
                         tasksArray.length != 0 ?
-                    tasksArray?.map((item)=>( 
+                    tasksArray?.map((item)=>(
                  <Task
   key={item.id}
   task={item}
   selectedTask={selectedTaskProp}
-  
+  refreshFlag={refreshFlag}
   setSelectedTask={setSelectedTaskProp}
   refreshTasks={refreshTasks}
   filter={filter}

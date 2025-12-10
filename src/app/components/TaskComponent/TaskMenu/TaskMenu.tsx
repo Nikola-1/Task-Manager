@@ -6,7 +6,7 @@ import SevenDays from "../../../../assets/img/7-days.png"
 import message from "../../../../assets/img/message-alert.png"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { faAngleDown, faAngleRight, faAnglesDown, faCheck, faEllipsis, faMarker, faPlus, faSign, faTag, faTicket, faTicketAlt, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faAngleDown, faAngleRight, faAnglesDown, faCheck, faEdit, faEllipsis, faMarker, faPlus, faSign, faTag, faTicket, faTicketAlt, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { supabase } from "@/app/connection/supabaseclient";
 import React, { useState,useEffect, useMemo } from "react"
@@ -22,15 +22,23 @@ interface TaskMenuProps {
     setToggleModal: React.Dispatch<React.SetStateAction<boolean>>;
    ToggleModal:boolean
    setTaskFilter: React.Dispatch<React.SetStateAction<string>>;
-   TaskFilter:string
+   ToggleModalTag:boolean
+   setToggleModalTag: React.Dispatch<React.SetStateAction<boolean>>;
+   TaskFilter:React.Dispatch<React.SetStateAction<boolean>>;
    categoryId:number
     setCategoryId: React.Dispatch<React.SetStateAction<number>>;
     setFilterImage: React.Dispatch<React.SetStateAction<string>>;
     setSelectedTask: React.Dispatch<React.SetStateAction<object | null>>;
     refreshFlag:boolean;
+    
+       SideMenuVisible:boolean;
+       setEditListItem:React.Dispatch<React.SetStateAction<object | null>>;
+       setMode:React.Dispatch<React.SetStateAction<string | undefined>>;
+       Mode:string|undefined;
+       setNameCategory:React.Dispatch<React.SetStateAction<string | undefined>>;
   }
   
-export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage,setSelectedTask }: TaskMenuProps){
+export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage,setSelectedTask,SideMenuVisible,setEditListItem,setMode,Mode,setNameCategory,ToggleModalTag,setToggleModalTag }: TaskMenuProps){
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [categories,setCategories] = useState<any[]>([]);
     const [visibleTags,setVisibleTags] = useState(false);
@@ -38,6 +46,7 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
     const {user} = useAuth();
     const [X,setX] = useState<number>(0);
     const [Y,setY] = useState<number>(0);
+    const [sideMenuHidden,setSideMenuHidden] = useState<boolean>(false);
     const { open, toggleMenu,setOpen, options,id,setId } = useOptionsMenu("task", {
    
     
@@ -45,22 +54,36 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
         label:"Delete",
         icon:faTrash,
         action:async ()=> {await supabase.from("Categories").delete().eq("id",id); ShowData(); setOpen(false);}, 
+    },
+    Edit:{
+        label:"Edit",
+        icon:faEdit,
+        action:async () => {setToggleModal(true); closeMenu();
+            
+            const {data,error} = await supabase.from("Categories").select('*,Stickers(*)').eq("id",id).single();
+            
+            if(error){
+                console.log(error);
+            }
+            else{
+                 setMode("Update");
+                
+                setNameCategory(data.name);
+                setEditListItem(data);
+            }
+
+        }
     }
   });
   const closeMenu = ()=> setOpen(false);
     const ShowData = async()=>{
-        const {data,error} = await supabase.from("Categories").select('*').eq('user_id',user?.id);
-        
+        const {data,error} = await supabase.from("Categories").select(`*,Stickers(sticker_path)`).eq('user_id',user?.id).order("id",{ascending:true});
+        console.log(data);
        setCategories(data ?? []);
        
     }
     
-    const handleOpenModal = ()=>{
-        setToggleModal(true); //Opening modal
-    }
-    const handleCloseModal = () => {
-        setToggleModal(false); // Closing modal
-      };
+    
      
     const [toggle,setToggle] = useState(true);
     const [menuButtonToggle,setMenuButtonToggle] = useState(Number);
@@ -73,8 +96,14 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
    
     ShowData();
   
-    //when something changes in other Component show data again
+    
   }, [refreshFlag,id]);
+  
+  useEffect(()=>{
+        if(!SideMenuVisible){
+            setSideMenuHidden(false);
+        }
+  },[SideMenuVisible])
   useEffect(()=>{
     console.log(X,Y);
   },[X,Y])
@@ -84,7 +113,12 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                 setX(e.clientX);
                       setY(e.clientY);
             }
-            }} className="Task-menu relative  border-blue-300 md:border-r-2 md:border-l-2 md:w-1/4" id="TaskMenu">
+            }} onTransitionEnd={()=>{
+                if(SideMenuVisible){
+                    setSideMenuHidden(true)
+                }
+                
+                }} className={`Task-menu relative  border-blue-300 transition-all duration-700 ease-in-out md:border-r-2 md:border-l-2  ${SideMenuVisible ? "right-full w-0 " : "right-0 md:w-1/4"} ${SideMenuVisible ? "" : ""}`} id="TaskMenu">
            
         <div className="task-menu-wrapper   w-full   md:h-screen    ">
         <FontAwesomeIcon icon={faAnglesDown} onClick={()=>{
@@ -129,7 +163,7 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                 <h5 className="text-blue-900 font-bold m-3 p-0.5">List</h5>
                 <p className="bg-blue-300 w-fit m-3 p-0.5 text-blue-900 rounded-md">Used: 3/9</p>
                 </div>
-                <FontAwesomeIcon onClick={()=> setToggleModal(!ToggleModal)} className="pr-3 hover:cursor-pointer text-blue-900" icon={faPlus} width={20} height={20}></FontAwesomeIcon>
+                <FontAwesomeIcon onClick={()=> {setToggleModal(!ToggleModal);  setMode("Insert");}  } className="pr-3 hover:cursor-pointer text-blue-900" icon={faPlus} width={20} height={20}></FontAwesomeIcon>
                 </div>
                 <ul className="max-h-[calc(3*3.5rem)]  overflow-y-scroll    p-3 ">
                 {categories.map((cat,i)=> <li onClick={async (e)=>{
@@ -138,9 +172,9 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                       setSelectedTask(null);
                       
                         setTaskFilter(cat.name);
-                        setFilterImage(cat.image)
+                        setFilterImage(cat.Stickers.sticker_path);
                     }} key={i} className={menuButtonToggle == i ? " grid-cols-1 group  h-fit background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >
-                        <div className=" group-[]:translate-x-3  transition-all  flex flex-row align-middle items-center "><img src={"../img/"+cat.image+".png"} width={20} height={10} alt="Calendar with number on it"></img> <p className="m-2">{cat.name}</p> </div> <div className="flex align-middle items-center"><p className="p-2">3</p><FontAwesomeIcon onClick={()=>{
+                        <div className=" group-[]:translate-x-3  transition-all  flex flex-row align-middle items-center "><img src={"../img/"+cat.Stickers.sticker_path+".png"} width={20} height={10} alt="Calendar with number on it"></img> <p className="m-2">{cat.name}</p> </div> <div className="flex align-middle items-center"><p className="p-2">3</p><FontAwesomeIcon onClick={()=>{
                             toggleMenu(); setId(cat.id)}} icon={faEllipsis} className="cursor-pointer"></FontAwesomeIcon></div>
                     </li>)}
                 
@@ -149,18 +183,32 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                 
             </div>
             <div className="Task-list ">
-                <div className="flex items-center justify-between ">
-                    <div className="flex transition-all">
+                <div className="group flex items-center justify-between cursor-pointer">
+                    <div className=" flex justify-center align-middle transition-all"onClick={()=> visibleTags ?  setVisibleTags(false) : setVisibleTags(true)}>
                         
-                <h5 className="text-blue-900 font-bold m-3 p-0.5 cursor-pointer" onClick={()=> visibleTags ?  setVisibleTags(false) : setVisibleTags(true)}><FontAwesomeIcon icon={faAngleRight} className={visibleTags ? "rotate-90 transition-all duration-500" : "rotate-0 transition-all duration-500"}></FontAwesomeIcon>Tags</h5>
-   
+                <h5 className="text-blue-900 font-bold m-3 p-0.5 cursor-pointer" >
+                    <FontAwesomeIcon icon={faAngleRight} className={visibleTags ? "rotate-90 transition-all duration-500" : "rotate-0 transition-all duration-500"}></FontAwesomeIcon>Tags</h5>
+                            
                 </div>
-               
+                            <div className="group-hover:visible invisible flex justify-end p-1 text-blue-900">
+                            <FontAwesomeIcon className="cursor-pointer"  icon={faEllipsis} width={20}></FontAwesomeIcon>
+                            <FontAwesomeIcon className="cursor-pointer" onClick={()=> {setToggleModalTag(!ToggleModal);}} icon={faPlus} width={20}></FontAwesomeIcon>
+                            </div>
                 </div>
                 <ul className="p-3" >
               
-                <li  className= {visibleTags ? "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1    items-center text-blue-900" : "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1    items-center text-blue-900 hidden" }    >
-                        <div className=" group-[]:translate-x-3 transition-all  flex flex-row align-middle items-center "><FontAwesomeIcon icon={faTag} width={20} height={10}></FontAwesomeIcon> <p className="m-2">Web</p> </div> <p>3</p>
+                <li  className= {visibleTags ? "group background-animation flex transition-all duration-200 flex-col justify-between align-middle    items-center text-blue-900" : "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1    items-center text-blue-900 hidden" }    >
+                        
+                        <div className=" group-[]:translate-x-3 w-full justify-between transition-all   flex flex-row align-middle items-center ">
+                            <div className={"flex flex-row justify-center align-middle items-center"}>
+                            <FontAwesomeIcon icon={faTag} width={20} height={10}></FontAwesomeIcon> 
+                            <p className="m-2">Web</p>
+                            </div>
+                            <div className="flex items-center justify-center px-5">
+                             <p className="px-2">3</p>
+                             <p className="rounded-full bg-orange-500 w-2 h-2" ></p>
+                             </div>
+                             </div> 
                     </li>
                     <hr className="border-blue-300 border-t-2 mt-3"></hr>
                 </ul>

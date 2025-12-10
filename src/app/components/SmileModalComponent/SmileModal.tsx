@@ -28,6 +28,9 @@ export default function SmileModal({isActive,setActive,setActiveStickerProp,Acti
     useEffect(()=>{
         getStickers();
     },[])
+    useEffect(()=>{
+        console.log(ActiveStickerProp);
+    },[ActiveStickerProp])
     return(
          <div className={isActive == true ? "flex absolute   w-full     top-4/4   shadow-md rounded-md bg-white   m-auto h-48  " : " hidden"} >
                 <div className=" inset-0 flex items-center align-middle justify-center w-full">
@@ -35,7 +38,7 @@ export default function SmileModal({isActive,setActive,setActiveStickerProp,Acti
                 <div className="flex flex-col p-3 relative w-full h-full ">
                   
                     <div className="grid xl:grid-cols-12 grid-cols-5  gap-4 h-32 mb-3 overflow-y-scroll">
-                        {stickers?.map((e)=> <Image className={ActiveStickerProp == e ? "bg-blue-300 p-1 transition-all rounded-md cursor-pointer" : "p-1 cursor-pointer"} onClick={()=>setActiveStickerProp(e)} src={"/img/"+e.sticker_path+".png"} alt="category image" key={e.id} height={40} width={40}/>)}
+                        {stickers?.map((e)=> <Image className={ActiveStickerProp?.id == e.id ? "bg-blue-300 p-1 transition-all rounded-md cursor-pointer" : "p-1 cursor-pointer"} onClick={()=>setActiveStickerProp(e)} src={"/img/"+e.sticker_path+".png"} alt="category image" key={e.id} height={40} width={40}/>)}
                               
                     </div>
                    
