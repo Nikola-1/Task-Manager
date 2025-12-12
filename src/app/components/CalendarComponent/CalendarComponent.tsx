@@ -17,14 +17,14 @@ interface ModalProps{
 export default function CalendarComponent({isActive,setActive,setCalendarDate}: ModalProps){
     
 
-    const n =31;
-    const RepeatOptions =['Daily','Weekly','Monthly','Yearly']
+    const n =31; //number of days in month
+    const RepeatOptions =['Daily','Weekly','Monthly','Yearly'] //array of period for repeating task 
     const MonthNames = [ "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"]
+  "July", "August", "September", "October", "November", "December"] 
     const [Year,setYear] = useState(new Date().getFullYear());
     const [Month,setMonth] = useState(new Date().getMonth());
     const [Day,setDay] = useState(new Date().getDate()+1);
-    const ReminderOptions =['1 day early','2 days early','3 days early','4 days early']
+    const ReminderOptions =['1 day early','2 days early','3 days early','4 days early'] // reminder array
   
     
   
@@ -116,7 +116,7 @@ export default function CalendarComponent({isActive,setActive,setCalendarDate}: 
                
                 <div className="flex w-full">
                     <button onClick={()=>{
-                     setCalendarDate(new Date(Year,Month,Day));
+                     setCalendarDate(new Date(Year,Month,Day)); //
                       
                         setActive(!isActive);
                         

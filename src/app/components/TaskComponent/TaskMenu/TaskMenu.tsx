@@ -30,7 +30,7 @@ interface TaskMenuProps {
     setFilterImage: React.Dispatch<React.SetStateAction<string>>;
     setSelectedTask: React.Dispatch<React.SetStateAction<object | null>>;
     refreshFlag:boolean;
-    
+    refreshFlagTags:boolean;
        SideMenuVisible:boolean;
        setEditListItem:React.Dispatch<React.SetStateAction<object | null>>;
        setMode:React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -38,17 +38,19 @@ interface TaskMenuProps {
        setNameCategory:React.Dispatch<React.SetStateAction<string | undefined>>;
   }
   
-export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage,setSelectedTask,SideMenuVisible,setEditListItem,setMode,Mode,setNameCategory,ToggleModalTag,setToggleModalTag }: TaskMenuProps){
+export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage,setSelectedTask,SideMenuVisible,setEditListItem,setMode,Mode,setNameCategory,ToggleModalTag,setToggleModalTag,refreshFlagTags }: TaskMenuProps){
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [categories,setCategories] = useState<any[]>([]);
     const [visibleTags,setVisibleTags] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [tags,setTags] = useState<any[]>([]);
     const [Filter, setFilter] = useState<string>("tasks");
     const {user} = useAuth();
     const [X,setX] = useState<number>(0);
     const [Y,setY] = useState<number>(0);
     const [sideMenuHidden,setSideMenuHidden] = useState<boolean>(false);
     const { open, toggleMenu,setOpen, options,id,setId } = useOptionsMenu("task", {
-   
+    
     
     Delete:{
         label:"Delete",
@@ -83,14 +85,26 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
        
     }
     
+    const GetTags= async() =>{
+            const {data,error} = await supabase.from("Tags").select("*").eq("User_id",user?.id);
     
+            if(error){
+                console.log(error);
+            }
+            else{
+                
+                setTags(data || []);
+                console.log(data);
+            }
+    
+        }
      
     const [toggle,setToggle] = useState(true);
     const [menuButtonToggle,setMenuButtonToggle] = useState(Number);
     
     useEffect(()=>{
         ShowData()
-      
+        GetTags();
     },[])
       useEffect(() => {
    
@@ -98,7 +112,12 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
   
     
   }, [refreshFlag,id]);
-  
+   useEffect(() => {
+   
+    
+  GetTags();
+    
+  }, [refreshFlagTags]);
   useEffect(()=>{
         if(!SideMenuVisible){
             setSideMenuHidden(false);
@@ -199,16 +218,19 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
               
                 <li  className= {visibleTags ? "group background-animation flex transition-all duration-200 flex-col justify-between align-middle    items-center text-blue-900" : "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1    items-center text-blue-900 hidden" }    >
                         
-                        <div className=" group-[]:translate-x-3 w-full justify-between transition-all   flex flex-row align-middle items-center ">
+                        {tags.map(tag=>
+
+                            <div key={tag.id} className=" group-[]:translate-x-3 w-full justify-between transition-all   flex flex-row align-middle items-center ">
                             <div className={"flex flex-row justify-center align-middle items-center"}>
                             <FontAwesomeIcon icon={faTag} width={20} height={10}></FontAwesomeIcon> 
-                            <p className="m-2">Web</p>
+                            <p className="m-2">{tag.name}</p>
                             </div>
                             <div className="flex items-center justify-center px-5">
                              <p className="px-2">3</p>
-                             <p className="rounded-full bg-orange-500 w-2 h-2" ></p>
+                             <p className="rounded-full  w-2 h-2" style={{backgroundColor:tag.color}}></p>
                              </div>
                              </div> 
+                        )}
                     </li>
                     <hr className="border-blue-300 border-t-2 mt-3"></hr>
                 </ul>
