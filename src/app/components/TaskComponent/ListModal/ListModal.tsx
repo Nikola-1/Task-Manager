@@ -52,7 +52,8 @@ export default function ListModal({isActive,setActive,onUpdate,editListItem,setE
         }
         else{
             console.log(ActiveSticker);
-            setFilterImage(ActiveSticker.sticker_path);
+            
+            setFilterImage(ActiveSticker?.sticker_path);
             setTaskFilter(nameCategory);
             handleSave();
         }
@@ -73,8 +74,9 @@ export default function ListModal({isActive,setActive,onUpdate,editListItem,setE
       
     },[])
     useEffect(()=>{
-        console.log(editListItem);
+        
         setActiveSticker(editListItem?.Stickers);
+        
     },[editListItem])
     useEffect(()=>{
         console.log(Mode)

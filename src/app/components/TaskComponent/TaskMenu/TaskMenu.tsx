@@ -35,10 +35,14 @@ interface TaskMenuProps {
        setEditListItem:React.Dispatch<React.SetStateAction<object | null>>;
        setMode:React.Dispatch<React.SetStateAction<string | undefined>>;
        Mode:string|undefined;
+       setModeTag:React.Dispatch<React.SetStateAction<string | undefined>>;
+       ModeTag:string|undefined;
+       setSelectedTag:React.Dispatch<React.SetStateAction<object | undefined>>;
        setNameCategory:React.Dispatch<React.SetStateAction<string | undefined>>;
+       setNameTag:React.Dispatch<React.SetStateAction<string | undefined>>;
   }
   
-export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage,setSelectedTask,SideMenuVisible,setEditListItem,setMode,Mode,setNameCategory,ToggleModalTag,setToggleModalTag,refreshFlagTags }: TaskMenuProps){
+export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage,setSelectedTask,SideMenuVisible,setEditListItem,setMode,Mode,setNameCategory,ToggleModalTag,setToggleModalTag,refreshFlagTags,setModeTag,ModeTag,setSelectedTag }: TaskMenuProps){
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [categories,setCategories] = useState<any[]>([]);
     const [visibleTags,setVisibleTags] = useState(false);
@@ -69,15 +73,39 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
             }
             else{
                  setMode("Update");
-                
                 setNameCategory(data.name);
                 setEditListItem(data);
+                console.log(data);
             }
 
         }
     }
   });
+   const { open:openTag, toggleMenu:toggleMenuTag,setOpen:setOpenTag, options:optionsTag,id:idTag,setId:setIdTag } = useOptionsMenu("Tag", {
+    
+    
+    
+    EditTag:{
+        label:"Edit",
+        icon:faEdit,
+        action:async () => {setToggleModalTag(true);
+            console.log(idTag);
+            const {data,error} = await supabase.from("Tags").select('*').eq("id",idTag).single();
+            
+            if(error){
+                console.log(error);
+            }
+            else{
+                 setModeTag("Update");
+                setSelectedTag(data);
+                
+            }
+            
+        }
+    }
+  });
   const closeMenu = ()=> setOpen(false);
+    const closeMenuTag = ()=> setOpenTag(false);
     const ShowData = async()=>{
         const {data,error} = await supabase.from("Categories").select(`*,Stickers(sticker_path)`).eq('user_id',user?.id).order("id",{ascending:true});
         console.log(data);
@@ -86,7 +114,7 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
     }
     
     const GetTags= async() =>{
-            const {data,error} = await supabase.from("Tags").select("*").eq("User_id",user?.id);
+            const {data,error} = await supabase.from("Tags").select("*").eq("User_id",user?.id).order("id",{ascending:true});;
     
             if(error){
                 console.log(error);
@@ -100,8 +128,8 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
         }
      
     const [toggle,setToggle] = useState(true);
-    const [menuButtonToggle,setMenuButtonToggle] = useState(Number);
-    
+    const [menuButtonToggle,setMenuButtonToggle] = useState<number | null>(null);
+     const [typeMenuButtonTogle,setTypeMenuButtonToggle] = useState<"Categories" | "Tags">("Categories");
     useEffect(()=>{
         ShowData()
         GetTags();
@@ -189,10 +217,10 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                     setMenuButtonToggle(i);
                       setCategoryId(cat.id);
                       setSelectedTask(null);
-                      
+                      setTypeMenuButtonToggle("Categories");
                         setTaskFilter(cat.name);
                         setFilterImage(cat.Stickers.sticker_path);
-                    }} key={i} className={menuButtonToggle == i ? " grid-cols-1 group  h-fit background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >
+                    }} key={i} className={menuButtonToggle == i && typeMenuButtonTogle == "Categories" ? " grid-cols-1 group  h-fit background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >
                         <div className=" group-[]:translate-x-3  transition-all  flex flex-row align-middle items-center "><img src={"../img/"+cat.Stickers.sticker_path+".png"} width={20} height={10} alt="Calendar with number on it"></img> <p className="m-2">{cat.name}</p> </div> <div className="flex align-middle items-center"><p className="p-2">3</p><FontAwesomeIcon onClick={()=>{
                             toggleMenu(); setId(cat.id)}} icon={faEllipsis} className="cursor-pointer"></FontAwesomeIcon></div>
                     </li>)}
@@ -211,30 +239,51 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                 </div>
                             <div className="group-hover:visible invisible flex justify-end p-1 text-blue-900">
                             <FontAwesomeIcon className="cursor-pointer"  icon={faEllipsis} width={20}></FontAwesomeIcon>
-                            <FontAwesomeIcon className="cursor-pointer" onClick={()=> {setToggleModalTag(!ToggleModal);}} icon={faPlus} width={20}></FontAwesomeIcon>
+                            <FontAwesomeIcon className="cursor-pointer" onClick={()=> {setToggleModalTag(!ToggleModal);  setModeTag("Add");}} icon={faPlus} width={20}></FontAwesomeIcon>
                             </div>
                 </div>
-                <ul className="p-3" >
+                <ul className="max-h-[calc(3*2.5rem)]  overflow-y-scroll    p-3 " >
               
-                <li  className= {visibleTags ? "group background-animation flex transition-all duration-200 flex-col justify-between align-middle    items-center text-blue-900" : "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1    items-center text-blue-900 hidden" }    >
+                <li  className= {visibleTags ? " background-animation flex transition-all duration-200 flex-col justify-between align-middle    items-center text-blue-900" : "group background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1    items-center text-blue-900 hidden" }    >
                         
                         {tags.map(tag=>
-
-                            <div key={tag.id} className=" group-[]:translate-x-3 w-full justify-between transition-all   flex flex-row align-middle items-center ">
+                                tag.parent_id == null ?
+                               <div key={tag.id} className="w-full">
+                            <div onClick={()=>{setMenuButtonToggle(tag.id);setTypeMenuButtonToggle("Tags");}}  className={`group translate-x-3 w-11/12 justify-between transition-all   flex flex-row align-middle items-center p-1 rounded-md ${menuButtonToggle == tag.id && typeMenuButtonTogle == "Tags" ? "bg-blue-300 " : ""}`}>
                             <div className={"flex flex-row justify-center align-middle items-center"}>
                             <FontAwesomeIcon icon={faTag} width={20} height={10}></FontAwesomeIcon> 
                             <p className="m-2">{tag.name}</p>
                             </div>
-                            <div className="flex items-center justify-center px-5">
-                             <p className="px-2">3</p>
-                             <p className="rounded-full  w-2 h-2" style={{backgroundColor:tag.color}}></p>
+                            <div className=" flex items-center justify-center ">
+                                     <p className="rounded-full  w-2 h-2" style={{backgroundColor:tag.color}}></p>
+                             <p className="group-hover:hidden  px-2 text-md">3</p>
+                            <FontAwesomeIcon className="group-hover:block hidden px-2 cursor-pointer" onClick={(e)=>{toggleMenuTag(); setIdTag(tag.id); console.log(idTag); }} icon={faEllipsis} width={20} height={20}/>
                              </div>
+                             
                              </div> 
+                             {tags.map(tag2=>
+                                tag2.parent_id == tag.id ?
+                                
+                                <div key={tag2.id} onClick={()=>{setMenuButtonToggle(tag2.id);setTypeMenuButtonToggle("Tags");}}  className={`group translate-x-3 pl-5 w-11/12 justify-between transition-all   flex flex-row align-middle items-center p-1 rounded-md ${menuButtonToggle == tag2.id && typeMenuButtonTogle == "Tags" ? "bg-blue-300 " : ""}`}>
+                            <div className={"flex flex-row justify-center align-middle items-center"}>
+                            <FontAwesomeIcon icon={faTag} width={20} height={10}></FontAwesomeIcon> 
+                            <p className="m-2">{tag2.name}</p>
+                            </div>
+                            <div className=" flex items-center justify-center ">
+                                     <p className="rounded-full  w-2 h-2" style={{backgroundColor:tag2.color}}></p>
+                             <p className="group-hover:hidden  px-2 text-md">3</p>
+                            <FontAwesomeIcon className="group-hover:block hidden px-2 cursor-pointer" onClick={(e)=>{toggleMenuTag(); setIdTag(tag2.id); console.log(idTag); }} icon={faEllipsis} width={20} height={20}/>
+                             </div>
+                             
+                             </div> : ""
+                             )}
+                             </div>
+                             : ""
                         )}
                     </li>
-                    <hr className="border-blue-300 border-t-2 mt-3"></hr>
+                    
                 </ul>
-
+                        <hr className="border-blue-300 border-t-2 mt-3 m-3"></hr>
                 
             </div>
             </div>
@@ -257,6 +306,7 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                 </div>
         </div>
         <OptionsMenu open={open} options={options} x={X} y={Y} closeMenu={closeMenu} />
+        <OptionsMenu open={openTag} options={optionsTag} x={X} y={Y} closeMenu={closeMenuTag} />
     </div>
     )
 }

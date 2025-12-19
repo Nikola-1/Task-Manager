@@ -28,9 +28,11 @@ export default function TaskComponent(){
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     
     const [selectedTask,setSelectedTask] = useState(Object);
+     const [selectedTag,setSelectedTag] = useState(Object);
     const [Filter,setFilter] = useState<string>("Today");
     const [FilterImage,setFilterImage] = useState<string>("");
     const [editListItem,setEditListItem] = useState<object | null>(null);
+    
     //task menu treba da napravi informaciju za taskDisplay kako bi prikazao novu listu taskova 
   
         const [categoryId,setCategoryId] = useState(0);
@@ -40,6 +42,7 @@ export default function TaskComponent(){
     
     const [nameCategory,setnameCategory] = useState<string | undefined>();
 const [ModeModal,setModeModal]=useState<string | undefined>();
+const [ModeModalTag,setModeModalTag]=useState<string | undefined>();
     const {user} =useAuth();
     
     
@@ -54,16 +57,18 @@ const [ModeModal,setModeModal]=useState<string | undefined>();
         setSelectedTask(null);
         
     },[Filter,categoryId])
-    
+    useEffect(()=>{
+        
+    },[ModeModalTag,selectedTag])
     return(
        <div className="flex md:flex-row flex-col w-full ">
           
-        <TaskMenu refreshFlagTags={refreshFlagTags} setToggleModalTag={setToggleModalTag} ToggleModalTag={toggleModalTag} Mode={ModeModal} setNameCategory={setnameCategory} setMode={setModeModal} setEditListItem={setEditListItem} SideMenuVisible={sideMenuVisible} refreshFlag={refreshFlag}  setSelectedTask={setSelectedTask}  setFilterImage={setFilterImage} setCategoryId={setCategoryId} categoryId={categoryId} setToggleModal={setToggleModalMenu} setTaskFilter={setFilter} ToggleModal={toggleModalMenu} TaskFilter={Filter}></TaskMenu>
+        <TaskMenu  setSelectedTag={setSelectedTag} setModeTag={setModeModalTag} refreshFlagTags={refreshFlagTags} setToggleModalTag={setToggleModalTag} ToggleModalTag={toggleModalTag} Mode={ModeModal} setNameCategory={setnameCategory} setMode={setModeModal} setEditListItem={setEditListItem} SideMenuVisible={sideMenuVisible} refreshFlag={refreshFlag}  setSelectedTask={setSelectedTask}  setFilterImage={setFilterImage} setCategoryId={setCategoryId} categoryId={categoryId} setToggleModal={setToggleModalMenu} setTaskFilter={setFilter} ToggleModal={toggleModalMenu} TaskFilter={Filter}></TaskMenu>
         <TaskDisplay  refreshFlag={refreshFlag} SideMenuVisible={sideMenuVisible} setSideMenuVisible={setSideMenuVisible} selectedTaskProp={selectedTask}  setSelectedTaskProp={setSelectedTask} categoryId={categoryId} filterImage={FilterImage} filter={Filter}   refreshTasks={refresh} tasksArray={tasks}  fullDate={selectedDate} setFullDate={setSelectedDate} ToggleModal={toggleModalCalendar} setToggleModal={setToggleModalCalendar}></TaskDisplay>
         <ListModal setTaskFilter={setFilter} setFilterImage={setFilterImage} nameCategory={nameCategory} setnameCategory={setnameCategory} Mode={ModeModal} setEditListItem={setEditListItem} editListItem={editListItem}  onUpdate={triggerRender}  isActive={toggleModalMenu} setActive={setToggleModalMenu}></ListModal>
        
         <CalendarModal setDate={setSelectedDate} DateInherited={selectedDate}  isActive={toggleModalCalendar} setActive={setToggleModalCalendar}></CalendarModal>
-        <TagModalComponent onUpdate={triggerRenderTags} refreshFlagTags={refreshFlagTags} isActive={toggleModalTag} setActive={setToggleModalTag} />
+        <TagModalComponent selectedTag={selectedTag} Mode={ModeModalTag} onUpdate={triggerRenderTags}  isActive={toggleModalTag} setActive={setToggleModalTag} />
     </div>
     )
 
