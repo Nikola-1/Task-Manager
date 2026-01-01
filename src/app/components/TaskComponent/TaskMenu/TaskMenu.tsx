@@ -24,9 +24,12 @@ interface TaskMenuProps {
    setTaskFilter: React.Dispatch<React.SetStateAction<string>>;
    ToggleModalTag:boolean
    setToggleModalTag: React.Dispatch<React.SetStateAction<boolean>>;
-   TaskFilter:React.Dispatch<React.SetStateAction<boolean>>;
+ 
    categoryId:number
     setCategoryId: React.Dispatch<React.SetStateAction<number>>;
+    tagId:number;
+    setTagId: React.Dispatch<React.SetStateAction<number>>;
+    setFilter: React.Dispatch<React.SetStateAction<string>>;
     setFilterImage: React.Dispatch<React.SetStateAction<string>>;
     setSelectedTask: React.Dispatch<React.SetStateAction<object | null>>;
     refreshFlag:boolean;
@@ -42,13 +45,13 @@ interface TaskMenuProps {
        setNameTag:React.Dispatch<React.SetStateAction<string | undefined>>;
   }
   
-export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTaskFilter,TaskFilter,categoryId,setCategoryId,setFilterImage,setSelectedTask,SideMenuVisible,setEditListItem,setMode,Mode,setNameCategory,ToggleModalTag,setToggleModalTag,refreshFlagTags,setModeTag,ModeTag,setSelectedTag }: TaskMenuProps){
+export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTaskFilter,setFilter,categoryId,setCategoryId,setFilterImage,setSelectedTask,SideMenuVisible,setEditListItem,setMode,Mode,setNameCategory,ToggleModalTag,setToggleModalTag,refreshFlagTags,setModeTag,ModeTag,setSelectedTag,setTagId,tagId }: TaskMenuProps){
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [categories,setCategories] = useState<any[]>([]);
     const [visibleTags,setVisibleTags] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [tags,setTags] = useState<any[]>([]);
-    const [Filter, setFilter] = useState<string>("tasks");
+    
     const {user} = useAuth();
     const [X,setX] = useState<number>(0);
     const [Y,setY] = useState<number>(0);
@@ -102,6 +105,11 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
             }
             
         }
+    },
+    DeleteTag:{
+        label:"Delete tag",
+        icon:faTrash,
+        action:async ()=> {await supabase.from("Tags").delete().eq("id",idTag); GetTags(); setOpenTag(false);}, 
     }
   });
   const closeMenu = ()=> setOpen(false);
@@ -146,6 +154,10 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
   GetTags();
     
   }, [refreshFlagTags]);
+  
+  useEffect(() => {
+    console.log(tagId);
+  },[tagId])
   useEffect(()=>{
         if(!SideMenuVisible){
             setSideMenuHidden(false);
@@ -180,6 +192,7 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                     <li onClick={async()=>{
                         setTaskFilter("Today");
                          setCategoryId(0);
+                         setTagId(0);
                           setMenuButtonToggle(-2);
                          setSelectedTask(null);
                          
@@ -190,6 +203,7 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                     <li onClick={async()=>{
                         setTaskFilter("7Days");
                         setCategoryId(0);
+                        setTagId(0);
                          setMenuButtonToggle(-1);
                         setSelectedTask(null);
                          setFilterImage("");
@@ -216,6 +230,8 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                 {categories.map((cat,i)=> <li onClick={async (e)=>{
                     setMenuButtonToggle(i);
                       setCategoryId(cat.id);
+                      setTagId(0);
+                      setSelectedTag(undefined);
                       setSelectedTask(null);
                       setTypeMenuButtonToggle("Categories");
                         setTaskFilter(cat.name);
@@ -249,7 +265,7 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                         {tags.map(tag=>
                                 tag.parent_id == null ?
                                <div key={tag.id} className="w-full">
-                            <div onClick={()=>{setMenuButtonToggle(tag.id);setTypeMenuButtonToggle("Tags");}}  className={`group translate-x-3 w-11/12 justify-between transition-all   flex flex-row align-middle items-center p-1 rounded-md ${menuButtonToggle == tag.id && typeMenuButtonTogle == "Tags" ? "bg-blue-300 " : ""}`}>
+                            <div onClick={()=>{setMenuButtonToggle(tag.id);setTypeMenuButtonToggle("Tags"); setCategoryId(0); setTagId(tag.id); setFilter(tag.name); setFilterImage(""); }}  className={`group translate-x-3 w-11/12 justify-between transition-all   flex flex-row align-middle items-center p-1 rounded-md ${menuButtonToggle == tag.id && typeMenuButtonTogle == "Tags" ? "bg-blue-300 " : ""}`}>
                             <div className={"flex flex-row justify-center align-middle items-center"}>
                             <FontAwesomeIcon icon={faTag} width={20} height={10}></FontAwesomeIcon> 
                             <p className="m-2">{tag.name}</p>
@@ -257,14 +273,14 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                             <div className=" flex items-center justify-center ">
                                      <p className="rounded-full  w-2 h-2" style={{backgroundColor:tag.color}}></p>
                              <p className="group-hover:hidden  px-2 text-md">3</p>
-                            <FontAwesomeIcon className="group-hover:block hidden px-2 cursor-pointer" onClick={(e)=>{toggleMenuTag(); setIdTag(tag.id); console.log(idTag); }} icon={faEllipsis} width={20} height={20}/>
+                            <FontAwesomeIcon className="group-hover:block hidden px-2 cursor-pointer" onClick={(e)=>{toggleMenuTag(); setIdTag(tag.id); console.log(idTag);  }} icon={faEllipsis} width={20} height={20}/>
                              </div>
                              
                              </div> 
                              {tags.map(tag2=>
                                 tag2.parent_id == tag.id ?
                                 
-                                <div key={tag2.id} onClick={()=>{setMenuButtonToggle(tag2.id);setTypeMenuButtonToggle("Tags");}}  className={`group translate-x-3 pl-5 w-11/12 justify-between transition-all   flex flex-row align-middle items-center p-1 rounded-md ${menuButtonToggle == tag2.id && typeMenuButtonTogle == "Tags" ? "bg-blue-300 " : ""}`}>
+                                <div key={tag2.id} onClick={()=>{setMenuButtonToggle(tag2.id);setTypeMenuButtonToggle("Tags"); setTagId(tag2.id); setFilter(tag2.name); setFilterImage("");}}  className={`group translate-x-3 pl-5 w-11/12 justify-between transition-all   flex flex-row align-middle items-center p-1 rounded-md ${menuButtonToggle == tag2.id && typeMenuButtonTogle == "Tags" ? "bg-blue-300 " : ""}`}>
                             <div className={"flex flex-row justify-center align-middle items-center"}>
                             <FontAwesomeIcon icon={faTag} width={20} height={10}></FontAwesomeIcon> 
                             <p className="m-2">{tag2.name}</p>
@@ -290,6 +306,7 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
             <div onClick={()=>{
                 setTaskFilter("Completed");
                   setCategoryId(0);
+                    setTagId(0);
                   setMenuButtonToggle(-3);
                   setSelectedTask(null);
                 setFilterImage("");
@@ -300,7 +317,7 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
 
                 <p className="px-2">Completed</p>
                 </div>
-                <div onClick={()=>{setTaskFilter("Deleted");  setCategoryId(0);  setFilterImage(""); setMenuButtonToggle(-4);}} className="p-3 flex justify-start items-center align-middle text-center align-middle hover:cursor-pointer text-blue-900">
+                <div onClick={()=>{setTaskFilter("Deleted");  setCategoryId(0); setTagId(0); setFilterImage(""); setMenuButtonToggle(-4);}} className="p-3 flex justify-start items-center align-middle text-center align-middle hover:cursor-pointer text-blue-900">
                 <FontAwesomeIcon icon={faTrash} width={20} height={10} className="text-blue-300"/>
                 <p className="px-2">Deleted</p>
                 </div>

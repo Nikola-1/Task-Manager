@@ -6,7 +6,10 @@ import { useEffect, useState } from "react";
 export default function useFilterTasks(
   filter: string,
   isCategory: boolean | null,
-  category_id: number
+  
+  category_id: number,
+  isTag:boolean | null,
+  TagId:number,
 ) {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,11 +21,11 @@ export default function useFilterTasks(
     let data, error;
 
     try {
-      // 🟦 1) Ako je filtriranje po kategoriji
+     
       if (isCategory !== null && category_id !== 0) {
         ({ data, error } = await supabase
           .from("Users_Tasks")
-          .select("tasks(*)")
+          .select("tasks(*,tags_tasks(*,Tags(*)))")
           .eq("tasks.category_id", category_id)
           .eq("tasks.Deleted", false)
           .eq("User_id", user?.id)
@@ -30,14 +33,14 @@ export default function useFilterTasks(
         );
       }
 
-      // 🟦 2) Bez kategorije → primeni filtere
+   
       else {
         const today = new Date().toISOString().split("T")[0];
 
         if (filter === "Today") {
           ({ data, error } = await supabase
             .from("Users_Tasks")
-            .select("tasks(*)")
+            .select("tasks(*,tags_tasks(*,Tags(*)))")
             .eq("tasks.date", today)
             .eq("tasks.Deleted", false)
             .eq("User_id", user?.id));
@@ -51,7 +54,7 @@ export default function useFilterTasks(
 
           ({ data, error } = await supabase
             .from("Users_Tasks")
-            .select("tasks(*)")
+            .select("tasks(*,tags_tasks(*,Tags(*)))")
             .gte("tasks.date", today)
             .lte("tasks.date", next7)
             .eq("tasks.Deleted", false)
@@ -61,7 +64,7 @@ export default function useFilterTasks(
         else if (filter === "Completed") {
           ({ data, error } = await supabase
             .from("Users_Tasks")
-            .select("tasks(*)")
+            .select("tasks(*,tags_tasks(*,Tags(*)))")
             .eq("tasks.Completed", true)
             .eq("tasks.Deleted", false)
             .eq("User_id", user?.id));
@@ -70,42 +73,63 @@ export default function useFilterTasks(
         else if (filter === "Deleted") {
           ({ data, error } = await supabase
             .from("Users_Tasks")
-            .select("tasks(*)")
+            .select("tasks(*,tags_tasks(*,Tags(*)))")
             .eq("tasks.Deleted", true)
             .eq("User_id", user?.id));
         }
 
         else {
-          // default – sve taskove
+          
           ({ data, error } = await supabase
             .from("Users_Tasks")
-            .select("tasks(*)")
+            .select("tasks(*,tags_tasks(*,Tags(*)))")
             .eq("User_id", user?.id));
         }
       }
+      if(isTag !== null && TagId !== 0){
+        ({ data, error } = await supabase
+          .from("tags_tasks")
+          .select("tasks(*,tags_tasks(*,Tags(*)))")
+          .eq("tasks.Deleted", false)
+          .eq("id_tag", TagId)
+          .eq("user_id", user?.id)
+          .order("id_task", { ascending: true })
+        );
+        console.log(data);
+      }
+      
+      
+
 
       if (error) {
         console.error("Supabase error:", error.message);
         setTasks([]);
       } else {
-        // 🟩 OVDE JE GLAVNI FIX → izvući tasks iz svake veze
-       const extracted = (data || [])
-  .map((item: any) => item.tasks)
-  .filter((t: any) => t !== null);
+       console.log("RAW fetched data:", data);
+       const extracted = (data ?? [])
+  .map((row: any) => row.tasks)
+  .filter(Boolean)
+  .map((t: any) => ({
+    ...t,
+    // OSTAVLJAMO ISTO IME koje Task komponenta koristi
+    tags_tasks: (t.tags_tasks ?? []).filter(
+      (jt: any) => jt.Tags != null
+    ),
+  }));
         setTasks(extracted);
       }
     } catch (err) {
       console.error("Unexpected error:", err);
       setTasks([]);
     }
-
+ 
     setLoading(false);
   };
 
-  // 🟦 Subscriptions + filter refetch
+  
   useEffect(() => {
     fetchData();
-
+    
     const subscription = supabase
       .channel("custom-all-channel")
       .on("postgres_changes",
@@ -113,7 +137,7 @@ export default function useFilterTasks(
         (payload) => {
           setTasks((prev) =>
             prev.map((t) =>
-              t.id === payload.new.id ? payload.new : t
+             t.id === payload.new.id ? { ...t, ...payload.new } : t
             )
           );
         }
@@ -123,7 +147,8 @@ export default function useFilterTasks(
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, [filter, isCategory, category_id]);
+    
+  }, [filter, isCategory, category_id,TagId,isTag]);
 
   return {
     tasks,

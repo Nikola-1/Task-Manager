@@ -9,7 +9,6 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import Placeholder from '@tiptap/extension-placeholder'
 import React, { ChangeEvent, useEffect, useState, useReducer } from "react";
 import { supabase } from "@/app/connection/supabaseclient";
-import useFilterTasks from "../hooks/useFilterTasks";
 import { useEditor,EditorContent } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import Document from '@tiptap/extension-document'
@@ -36,10 +35,13 @@ interface TaskDisplayProps {
    refreshTasks: ()=> Promise<void>
    filter: string
    filterImage:string
-   categoryId:number
+   categoryId:number;
+   tagId:number;
    refreshFlag:boolean;
    setSelectedTaskProp: React.Dispatch<React.SetStateAction<TaskType | null>>
    selectedTaskProp:TaskType | null
+   
+  
    setSideMenuVisible:React.Dispatch<React.SetStateAction<boolean>>
    SideMenuVisible:boolean;
   }
@@ -54,6 +56,7 @@ export default function TaskDisplay({
   filterImage,
   refreshFlag,
   categoryId,
+  tagId,
   setSelectedTaskProp,
   selectedTaskProp,
   SideMenuVisible,
@@ -94,21 +97,7 @@ useEffect(() => {
     editor.commands.setContent(selectedTaskProp.content || "");
   }
 }, [selectedTaskProp?.id]);
-// useEffect(() => {
 
-//   if (!selectedTaskProp || tasksArray.length === 0) return;
-
-//   const updated = tasksArray.find(t => t.id === selectedTaskProp.id);
-
-//   if (updated && updated.content !== selectedTaskProp.content) {
-
-    
-//     setSelectedTaskProp({...updated})
-    
-//   }
-// }, [tasksArray]);
-  
-  //    useEffect(()=>{
  
   const setUserAfterDisplay = async()=>{
         const {data,error} = await supabase.from("Users").select("*").eq("id",user?.id).single();
@@ -173,32 +162,70 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
         setToggleModal(true);
        
     }
-    const AddTask = async (name:string,fullDate:Date,categoryId?:number) =>{
-        
-      const { data:TaskData,error } = categoryId != 0 ? await supabase
-        .from('tasks')
-        .insert({  name: name,date:fullDate,category_id:categoryId,user_id:user?.id }).select("*") : await supabase
-        .from('tasks')
-        .insert({  name: name,date:fullDate,user_id:user?.id }).select("*");
-       
-        if (!error) {
-      
-          const {data:userTaskData,error:errorUsersTask} = await supabase.from("Users_Tasks").insert({"User_id":user?.id,"Task_id":TaskData[0].id}).select("*");
+  const AddTask = async (
+  name: string,
+  fullDate: Date,
+  categoryId?: number,
+  tagId?: number
+) => {
+  // DATE kolona → šaljemo YYYY-MM-DD
+  const dateStr = fullDate.toISOString().slice(0, 10);
 
-          if(errorUsersTask){
-            console.log(userTaskData);
-            console.log(error);
-          }
-          else{
-            console.log(userTaskData);
-            refreshTasks(); 
-          }
-    
-  } else {
-    console.error("Delete failed:", error.message);
+  // 1️⃣ INSERT TASK (SAMO JEDNOM)
+  const taskPayload: any = {
+    name,
+    date: dateStr,
+    user_id: user?.id,
+  };
+
+  if (categoryId && categoryId !== 0) {
+    taskPayload.category_id = categoryId;
   }
 
+  const { data: taskData, error: taskError } = await supabase
+    .from("tasks")
+    .insert(taskPayload)
+    .select("*")
+    .single();
+
+  if (taskError || !taskData) {
+    console.error("Task insert failed:", taskError?.message);
+    return;
+  }
+
+  const taskId = taskData.id;
+
+  // 2️⃣ LINK USER ↔ TASK
+  const { error: userTaskError } = await supabase
+    .from("Users_Tasks")
+    .insert({
+      User_id: user?.id,
+      Task_id: taskId,
+    });
+
+  if (userTaskError) {
+    console.error("Users_Tasks insert failed:", userTaskError.message);
+  }
+
+  // 3️⃣ LINK TAG ↔ TASK (OPCIONO)
+  if (tagId && tagId !== 0) {
+    const { error: tagTaskError } = await supabase
+      .from("tags_tasks")
+      .insert({
+        id_tag: tagId,
+        id_task: taskId,
+        user_id: user?.id,
+      });
+
+    if (tagTaskError) {
+      console.error("tags_tasks insert failed:", tagTaskError.message);
     }
+  }
+
+  // 4️⃣ REFRESH JEDNOM
+  refreshTasks();
+};
+
     const handleCloseModal = () => {
         setToggleModal(false); // Zatvaranje modala
       };
@@ -278,7 +305,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
          
                         <input className="absolute z-20 bg-transparent outline-none group-focus-within:outline-none placeholder-white" onChange={handleChange} onKeyDown={(e)=>{
                             if(e.key === "Enter" && inputValue != "" && inputValue != " "){
-                                AddTask(inputValue,fullDate,categoryId);
+                                AddTask(inputValue,fullDate,categoryId,tagId);
                                 
                             }
                        

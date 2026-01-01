@@ -8,8 +8,9 @@ interface TagModalProps{
     Mode:string | undefined;
       onUpdate: React.Dispatch<React.SetStateAction<void>>;
     selectedTag:object | null;
+    setSelectedTag:React.Dispatch<React.SetStateAction<object | null>>;
 }
-const TagModalComponent = ({isActive,setActive,onUpdate,Mode,selectedTag}:TagModalProps) => {
+const TagModalComponent = ({isActive,setActive,onUpdate,Mode,selectedTag,setSelectedTag}:TagModalProps) => {
     const [name,setName] = useState<string>();
     const [color,setColor] = useState<string | null>(null);
     const [parentTag,setParentTag] = useState<number | null>(null);
@@ -131,7 +132,7 @@ const TagModalComponent = ({isActive,setActive,onUpdate,Mode,selectedTag}:TagMod
                 <div className="flex flex-col w-full">
                     <div className="flex w-full">
                     
-                    <input value={name} onChange={e=>setName(e.currentTarget.value)} type="text" className=" border-blue-300 border-2 rounded-md  outline-none indent-1  w-full"></input>
+                    <input value={name ?? ""} onChange={e=>setName(e.currentTarget.value)} type="text" className=" border-blue-300 border-2 rounded-md  outline-none indent-1  w-full"></input>
                     </div>
                     <div className="relative">
                   
@@ -152,10 +153,10 @@ const TagModalComponent = ({isActive,setActive,onUpdate,Mode,selectedTag}:TagMod
                 </div>
                 <div className=" flex w-full my-1">
                     <p className='w-1/4'>Parent</p>
-                    <select className='w-full' disabled={hasChildren}   onChange={(e)=>{setParentTag(parseInt(e.currentTarget.value))} }>
-                        <option selected={Mode == "Add" || selectedTag?.parent_id == null ? true : false }  value={null} className='w-3/4'>None</option>
+                    <select className='w-full' disabled={hasChildren} value={selectedTag != null ? selectedTag?.parent_id : ""}   onChange={(e)=>{setParentTag(parseInt(e.currentTarget.value))} }>
+                        <option selected={Mode == "Add" || selectedTag?.parent_id == undefined ? true : false }  defaultValue={undefined} className='w-3/4'>None</option>
                         {tags?.map(tag => tag.id !=selectedTag?.id && tag.parent_id == null ?
-                             <option  key={tag.id}   selected={Mode == "Update" && tag.id == selectedTag?.parent_id ? true : false }  value={tag.id} className='w-3/4'>{tag.name}</option>
+                             <option  key={tag.id}     value={tag.id} className='w-3/4'>{tag.name}</option>
                              :
                              ""
                              )}
@@ -175,7 +176,7 @@ const TagModalComponent = ({isActive,setActive,onUpdate,Mode,selectedTag}:TagMod
                 } } >{Mode == "Update" ? "Edit" : "Add"}</p>
                     <p className="border-blue-300 cursor-pointer m-2 p-2 border-2 rounded-md hover:text-white hover:bg-blue-300" onClick={async()=>{
                  setActive(false);
-                   
+                   setSelectedTag(null);
                 } } >Close</p>
 
                 </div>

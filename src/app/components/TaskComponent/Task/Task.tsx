@@ -40,7 +40,7 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
       URL.revokeObjectURL(url);
   }
   
-
+ 
   const fileInput = useRef<HTMLInputElement>(null);
    const {user} = useAuth();
   const { open, toggleMenu,setOpen, options } = useOptionsMenu("", {
@@ -165,12 +165,14 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
            <p className='bg-blue-800 text-white text-xs rounded-md p-1 mx-1'><button onClick={Download}><FontAwesomeIcon  icon={faDownload}/></button></p> 
         </div>
          : ""} 
+         <p className='flex m-1'>{task.tags_tasks?.map((tag: any) => <p className={`m-1  text-white p-1 text-sm rounded-md`} style={tag.Tags.color ? { backgroundColor:tag.Tags.color} : { backgroundColor:"#4463BD"}} key={tag.id}>{tag.Tags.name}</p>)}</p>
         </div>
        
        
       </div>
       <div className='flex items-center'>
       <div className="flex items-center">
+        
         <p className={`mx-2 ${task.date < new Date().toISOString().split("T")[0] ? "text-red-700" : ""}`}>{task.date ? DateExpression(task.date) : "no date"}</p>
         <FontAwesomeIcon
           icon={filter !== "Deleted" ? faClose : faTrashAlt}
