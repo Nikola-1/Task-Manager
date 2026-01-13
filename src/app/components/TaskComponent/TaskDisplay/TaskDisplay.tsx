@@ -44,6 +44,7 @@ interface TaskDisplayProps {
   
    setSideMenuVisible:React.Dispatch<React.SetStateAction<boolean>>
    SideMenuVisible:boolean;
+   tagsDisplayProps:object[];
   }
 export default function TaskDisplay({
   setToggleModal,
@@ -60,7 +61,8 @@ export default function TaskDisplay({
   setSelectedTaskProp,
   selectedTaskProp,
   SideMenuVisible,
-  setSideMenuVisible
+  setSideMenuVisible,
+  tagsDisplayProps
 }:TaskDisplayProps){
   
      
@@ -335,6 +337,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
                  <Task
   key={item.id}
   task={item}
+  
   selectedTask={selectedTaskProp}
   refreshFlag={refreshFlag}
   setSelectedTask={setSelectedTaskProp}

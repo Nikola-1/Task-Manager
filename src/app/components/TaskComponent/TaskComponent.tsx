@@ -26,7 +26,7 @@ export default function TaskComponent(){
     const [toggleModalTag,setToggleModalTag] = useState(false);
     const [selectedDate,setSelectedDate] = useState<Date | null>(new Date());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    
+    const [tags,setTags] = useState<object[]>([]);
     const [selectedTask,setSelectedTask] = useState(Object);
      const [selectedTag,setSelectedTag] = useState(Object);
     const [Filter,setFilter] = useState<string>("Today");
@@ -42,7 +42,7 @@ export default function TaskComponent(){
         const [sideMenuVisible,setSideMenuVisible] = useState<boolean>(false);
     const { tasks, refresh } = useFilterTasks(Filter,isCategory,categoryId, isTag,tagId);
     
-    const [nameCategory,setnameCategory] = useState<string | undefined>();
+    const [nameCategory,setnameCategory] = useState<string | undefined>("");
 const [ModeModal,setModeModal]=useState<string | undefined>();
 const [ModeModalTag,setModeModalTag]=useState<string | undefined>();
     const {user} =useAuth();

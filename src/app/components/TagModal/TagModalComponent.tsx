@@ -153,8 +153,8 @@ const TagModalComponent = ({isActive,setActive,onUpdate,Mode,selectedTag,setSele
                 </div>
                 <div className=" flex w-full my-1">
                     <p className='w-1/4'>Parent</p>
-                    <select className='w-full' disabled={hasChildren} value={selectedTag != null ? selectedTag?.parent_id : ""}   onChange={(e)=>{setParentTag(parseInt(e.currentTarget.value))} }>
-                        <option selected={Mode == "Add" || selectedTag?.parent_id == undefined ? true : false }  defaultValue={undefined} className='w-3/4'>None</option>
+                    <select className='w-full' disabled={hasChildren} value={selectedTag?.parent_id ?? ""}   onChange={(e)=>{setParentTag(e.currentTarget.value === "" ? null :  Number(e.currentTarget.value))} }>
+                        <option   className='w-3/4'>None</option>
                         {tags?.map(tag => tag.id !=selectedTag?.id && tag.parent_id == null ?
                              <option  key={tag.id}     value={tag.id} className='w-3/4'>{tag.name}</option>
                              :

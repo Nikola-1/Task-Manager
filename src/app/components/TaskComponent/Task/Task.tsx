@@ -2,7 +2,7 @@ import { supabase } from '@/app/connection/supabaseclient';
 //import React, {  useEffect, useState } from 'react'
 import { Editor } from '@tiptap/core';
 import TaskCategoryImage from '../TaskDisplay/TaskCategoryImage';
-import { faCheckSquare, faClose, faDownload, faEllipsis, faFile, faFileAlt, faFlag, faSquareCheck, faTag, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCheckSquare, faClose, faDotCircle, faDownload, faEllipsis, faFile, faFileAlt, faFlag, faNoteSticky, faSquareCheck, faTag, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TaskType } from '../Types/TaskType';
 import useOptionsMenu from '../hooks/useOptionsMenu';
@@ -41,8 +41,10 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
   }
   
  
+
   const fileInput = useRef<HTMLInputElement>(null);
    const {user} = useAuth();
+   const [tags,setTags] = useState<object[]>([]);
   const { open, toggleMenu,setOpen, options } = useOptionsMenu("", {
      
       complete:{
@@ -53,7 +55,10 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
              Tag:{
                 label:"Add tag",
                 icon:faTag,
-                action:()=>{console.log("mark")}
+                action:async()=>{setOpenMenuTag2(true); const {data:dataTagsMenu,error:errorTagsMenu} = await supabase.from("Tags").select("*").eq("User_id",user?.id); 
+                if(dataTagsMenu) setTags(dataTagsMenu);
+                console.log(tags);
+               }
             },
              Prioirity:{
                 label:"Set priority",
@@ -98,7 +103,37 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
   })
       
     });
-    
+    const {open:openMenu2,toggleMenu:toggleMenuTag2,setOpen:setOpenMenuTag2,options:optionsTag2,id:idTag2,setId:setIdTag2} = useOptionsMenu("tag",{
+      ...(tags.map((tag:any) => ({
+        [`tag-${tag.id}`]:{
+          label:task.tags_tasks?.some((t:any) => t.id_tag === tag.id) ? `✔  ${tag.name}` : `${tag.name}`,
+          icon:faTag,
+          action:async()=>{
+            console.log(`Adding tag ${tag.name} to task ${task.id}`);
+            if(task.tags_tasks?.some((t:any) => t.id_tag === tag.id)){
+              const {data,error} = await supabase.from("tags_tasks").delete().eq("id_tag",tag.id).eq("id_task",task.id).eq("user_id",user?.id);
+              
+              if(!error){
+                console.log("Tag removed from task");
+                refreshTasks();
+                ClosemenuTag2();
+              }
+              return;
+            }
+            else{
+              const {data,error} = await supabase.from("tags_tasks").insert({id_tag:tag.id,id_task:task.id,user_id:user?.id});
+              if(!error){
+                console.log("Tag added to task");
+                refreshTasks();
+                ClosemenuTag2();
+              }
+
+            }
+          }
+        }
+      }))
+      ).reduce((acc, curr) => ({ ...acc, ...curr }), {})
+    });
   function DateExpression(item: any) {
     switch (new Date(item).getDate() - new Date().getDate()) {
       case 0: return "Today";
@@ -125,6 +160,7 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
   
     }
     const closeMenu = ()=> setOpen(false);
+    const ClosemenuTag2 = ()=> setOpenMenuTag2(false);
    useEffect(() => {
             
              
@@ -165,7 +201,7 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
            <p className='bg-blue-800 text-white text-xs rounded-md p-1 mx-1'><button onClick={Download}><FontAwesomeIcon  icon={faDownload}/></button></p> 
         </div>
          : ""} 
-         <p className='flex m-1'>{task.tags_tasks?.map((tag: any) => <p className={`m-1  text-white p-1 text-sm rounded-md`} style={tag.Tags.color ? { backgroundColor:tag.Tags.color} : { backgroundColor:"#4463BD"}} key={tag.id}>{tag.Tags.name}</p>)}</p>
+        {task.tags_tasks?.map((tag: any) => <p className={`m-1  text-white p-1 text-sm rounded-md w-fit`} style={tag.Tags.color ? { backgroundColor:tag.Tags.color} : { backgroundColor:"#4463BD"}} key={tag.id}>{tag.Tags.name}</p>)}
         </div>
        
        
@@ -202,6 +238,7 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
         />
          <input type='file' ref={fileInput} className="hidden " />
         <OptionsMenu open={open} options={options} x={X} y={Y} closeMenu={closeMenu} />
+        <OptionsMenu open={openMenu2} options={optionsTag2} x={X+150} y={Y+50} closeMenu={ClosemenuTag2} />
     </div>
   );
 }

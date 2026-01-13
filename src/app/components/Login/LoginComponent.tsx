@@ -9,7 +9,7 @@ import { supabase } from '@/app/connection/supabaseclient';
 import { useAuth } from '@/app/context/AuthContext';
 import "./Login.css";
 import 'swiper/css';
-
+import { useRouter } from 'next/navigation';
 const Micro = Micro_5({weight:"400",subsets:['latin'],});
  interface LoginProps{
     setLoginProps:React.Dispatch<React.SetStateAction<boolean>>
@@ -25,6 +25,7 @@ export default function  LoginComponent({setLoginProps,setUserProps}:LoginProps)
         
       const [singUp,setSignUp] = useState<boolean>(false);
       const {setUser} = useAuth();
+      const router = useRouter();
   async function Register(){
           if(Username != null && Name != null && Surname != null && Email != null && Password != null){
               const {error} = await supabase.from("Users").insert({Name:Name,Surname:Surname,Password:Password,email:Email,Username:Username});
@@ -48,6 +49,7 @@ export default function  LoginComponent({setLoginProps,setUserProps}:LoginProps)
                      setUserProps(data);
                      setUser(data);
                     setLoginProps(true);
+                    await router.push("/pages/Task");
               }
               else{
                 if(error?.code === 'PGRST116'){

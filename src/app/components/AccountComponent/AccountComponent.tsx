@@ -1,9 +1,10 @@
 'use client'
 import { useAuth } from '@/app/context/AuthContext'
 import React from 'react'
+import AccountOptionsComponent from './AccountOptionsComponent/AccountOptionsComponent';
 
 export default function AccountComponent(){
-    const {user} = useAuth();
+    const {user,logout} = useAuth();
   return (
     <div className='w-full flex relative'>
         <div className='flex absolute translate-y-32 left-0 right-0   flex-col justify-center align-middle w-5/6 m-auto'>
@@ -16,7 +17,11 @@ export default function AccountComponent(){
         
           <p>{user?.email}</p>
           </div>
+          
             </div>
+           <div className='my-3 absolute translate-y-48 left-0 right-0   flex flex-col justify-center align-middle w-5/6 m-auto  rounded-md'>
+           <AccountOptionsComponent user={user} logout={logout}/>
+           </div>
     </div>
   )
 }
