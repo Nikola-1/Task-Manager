@@ -8,6 +8,7 @@ import user from "../../../assets/img/user.png"
 import Calendar from "../../../assets/img/calendar.png";
 import sync from "../../../assets/img/sync.png";
 import clock from "../../../assets/img/clock.png";
+import Groups from "../../../assets/img/Groups.png";
 import { Micro_5 } from "next/font/google";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faList } from "@fortawesome/free-solid-svg-icons";
@@ -32,6 +33,7 @@ export default function Nav(){
                     <li className="m-3 flex justify-center align-middle"><Link href="/pages/Task"><Image src={menu} alt="Meni image"  width={40} height={40} /></Link></li>
                     <li className="m-3 flex justify-center align-middle"><Link href="/pages/Calendar"><Image src={Calendar} alt="Calendar image"  width={40} height={40} /></Link></li>
                     <li className="m-3 flex justify-center align-middle"><Link href="/pages/Habits"><Image src={sync} alt="sync image"  width={40} height={40} /></Link></li>
+                     <li className="m-3 flex justify-center align-middle"><Link href="/pages/Groups"><Image src={Groups} alt="sync image"  width={40} height={40} /></Link></li>
                     <li className="m-3 flex justify-center align-middle"><Link href="/pages/Pomodoro"><Image src={clock} alt="clock image"  width={40} height={40} /></Link></li>
                     <hr className="text-blue-900 border-blue-900 "></hr>
                 </ul>

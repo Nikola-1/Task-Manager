@@ -4,11 +4,14 @@ import { faEdit } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useEffect, useRef } from 'react'
 import { supabase } from '@/app/connection/supabaseclient';
+import Link from 'next/link';
+import CryptoJS from 'crypto-js';
 interface AccountDisplayComponentProps {
 
   visible?:boolean;
 
 }
+
 const AccountDisplayComponent = ({ visible }: AccountDisplayComponentProps) => {
   const [edit,setEdit] =React.useState(false);
   const {user,setUser} =useAuth();
@@ -23,7 +26,20 @@ const AccountDisplayComponent = ({ visible }: AccountDisplayComponentProps) => {
   
   const usernameRef =useRef(null);
 
+ const sendEmailNotification = (email:string)=>{
  
+  const numbers = [Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10)];
+  const letternumbers = numbers.splice(0,4).toString().replace(/,/g,'');
+  localStorage.setItem("verificationCode",letternumbers);
+  fetch("/api/send-email", {
+  method: "POST",
+  body: JSON.stringify({
+    to: email,
+    subject: "Dobrodošao",
+    text: `Dear ${user?.Username}, your verification code is: ${letternumbers}`,
+  }),
+});
+}
   async function  saveChanges(){
    //logic for saving changes to user profile
    const {data,error} = await supabase.from('Users').update({Name:Name,Surname:Surname,Username:Username}).eq('id',user?.id).select().single();
@@ -72,7 +88,7 @@ const AccountDisplayComponent = ({ visible }: AccountDisplayComponentProps) => {
       <label htmlFor='password' className='text-sm'>Password:</label>
       <input className='outline-none' type="password" value={Password} readOnly={!edit} />
             </div>
-       <FontAwesomeIcon icon={faEdit} className="ml-2 text-white cursor-pointer bg-blue-500 rounded-md p-3 hover:bg-blue-700" />
+       <Link onClick={()=>sendEmailNotification(user.email)} href="/pages/VerifyCode"><FontAwesomeIcon icon={faEdit} className="ml-2 text-white cursor-pointer bg-blue-500 rounded-md p-3 hover:bg-blue-700" /></Link>
       </div>
        <div className='flex items-center justify-between'>
         <div>
