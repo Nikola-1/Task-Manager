@@ -5,6 +5,7 @@ import "./globals.css";
 
 import {AuthProvider} from "./context/AuthContext";
 import ClientLayout from "./ClientLayout";
+import { ScopeProvider } from "./context/ScopeContext";
 
 
 
@@ -44,8 +45,10 @@ export default function RootLayout({
         <div className="flex md:flex-row flex-col justify-center   md:justify-start w-dvw">
          
          <AuthProvider>
-         
+         <ScopeProvider >
+          
           <ClientLayout>{children}</ClientLayout>
+          </ScopeProvider>
           </AuthProvider>
       
         

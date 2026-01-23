@@ -14,9 +14,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faList } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import Link from "next/link"
+import { useScope } from "@/app/context/ScopeContext";
 const Micro = Micro_5({weight:"400",subsets:['latin'],});
 export default function Nav(){
         const [active,setActive] = useState(false);
+       
     return(
         <div className={ +  active ? "nav float-left md:w-36   bg-blue-300 h-screen z-10 transition-transform " : "nav float-left md:w-36   bg-blue-300 h-fit md:h-screen z-10 transition-transform"}>
 
@@ -30,7 +32,7 @@ export default function Nav(){
                 <ul className={+ active ? "md:flex md:flex-col  justify-center align-middle " : "md:flex md:flex-col  justify-center align-middle hidden"}>
                     {/* <li><FontAwesomeIcon icon={faUser} width={30} height={30} /></li> */}
                     <li className="m-3 flex justify-center align-middle"><Link href="/pages/Account"><Image src={user} alt="user image"  width={40} height={40} /></Link></li>
-                    <li className="m-3 flex justify-center align-middle"><Link href="/pages/Task"><Image src={menu} alt="Meni image"  width={40} height={40} /></Link></li>
+                    <li  className="m-3 flex justify-center align-middle"><Link href="/pages/Task"><Image src={menu} alt="Menu image"  width={40} height={40} /></Link></li>
                     <li className="m-3 flex justify-center align-middle"><Link href="/pages/Calendar"><Image src={Calendar} alt="Calendar image"  width={40} height={40} /></Link></li>
                     <li className="m-3 flex justify-center align-middle"><Link href="/pages/Habits"><Image src={sync} alt="sync image"  width={40} height={40} /></Link></li>
                      <li className="m-3 flex justify-center align-middle"><Link href="/pages/Groups"><Image src={Groups} alt="sync image"  width={40} height={40} /></Link></li>

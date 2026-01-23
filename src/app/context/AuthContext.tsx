@@ -20,7 +20,7 @@ export function AuthProvider({children}: {children:ReactNode}){
     const [loggedIn,setLoggedIn] = useState(false);
     const [DisplayTasks,setDisplayTasks] = useState(false);
     const router = useRouter();
-
+    
      const logout = async () => {
     await router.push("/login");
     setUser(null);

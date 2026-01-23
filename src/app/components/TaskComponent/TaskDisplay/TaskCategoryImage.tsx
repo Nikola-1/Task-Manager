@@ -30,7 +30,7 @@ export default function TaskCategoryImage({id,refreshFlag}:TaskCategoryImageProp
       
         <>
    
-        { imageUrl ? <img  src={"../img/"+imageUrl+".png"} height={20} width={20}></img> : <></>}
+        { imageUrl ? <img  src={"/img/"+imageUrl+".png"} height={20} width={20}></img> : <></>}
         </>
     )
 

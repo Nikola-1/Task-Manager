@@ -17,6 +17,8 @@ import useFilterTasks from "../hooks/useFilterTasks"
 import { useAuth } from "@/app/context/AuthContext"
 import useOptionsMenu from "../hooks/useOptionsMenu"
 import { OptionsMenu } from "../../OptionsMenu/OptionsMenu"
+import { useScope } from "@/app/context/ScopeContext"
+import { group } from "console"
 
 interface TaskMenuProps {
     setToggleModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -51,8 +53,10 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
     const [visibleTags,setVisibleTags] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [tags,setTags] = useState<any[]>([]);
-    
+    //Contexts
     const {user} = useAuth();
+    const {groupId} = useScope();
+    //
     const [X,setX] = useState<number>(0);
     const [Y,setY] = useState<number>(0);
     const [sideMenuHidden,setSideMenuHidden] = useState<boolean>(false);
@@ -62,7 +66,7 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
     Delete:{
         label:"Delete",
         icon:faTrash,
-        action:async ()=> {await supabase.from("Categories").delete().eq("id",id); ShowData(); setOpen(false);}, 
+        action:async ()=> {await supabase.from("Categories").delete().eq("id",id); getCategories(); setOpen(false);}, 
     },
     Edit:{
         label:"Edit",
@@ -109,21 +113,41 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
     DeleteTag:{
         label:"Delete tag",
         icon:faTrash,
-        action:async ()=> {await supabase.from("Tags").delete().eq("id",idTag); GetTags(); setOpenTag(false);}, 
+        action:async ()=> {
+            
+            await supabase.from("Tags").delete().eq("id",idTag); GetTags(); setOpenTag(false);}, 
     }
   });
   const closeMenu = ()=> setOpen(false);
     const closeMenuTag = ()=> setOpenTag(false);
-    const ShowData = async()=>{
-        const {data,error} = await supabase.from("Categories").select(`*,Stickers(sticker_path)`).eq('user_id',user?.id).order("id",{ascending:true});
+    const getCategories = async()=>{
+        let data,error;
+        if(groupId == null){
+
+            ({data,error} = await supabase.from("Categories").select(`*,Stickers(sticker_path)`).eq('user_id',user?.id).is("group_id",null).order("id",{ascending:true}));
+        }
+        else{
+            ({data,error} = await supabase.from("Categories").select(`*,Stickers(sticker_path)`).eq('user_id',user?.id).eq("group_id",groupId).order("id",{ascending:true}));
+        }
+        if(error){
+            console.log(error);
+        }
+
         console.log(data);
-       setCategories(data ?? []);
+        setCategories(data ?? []);
        
     }
     
     const GetTags= async() =>{
-            const {data,error} = await supabase.from("Tags").select("*").eq("User_id",user?.id).order("id",{ascending:true});;
-    
+        let data,error;
+        if(groupId == null){
+                  
+                ({data,error} = await supabase.from("Tags").select("*").eq("User_id",user?.id).is("group_id",null).order("id",{ascending:true}));;
+        }
+        else{
+            ({data,error} = await supabase.from("Tags").select("*").eq("User_id",user?.id).eq("group_id",groupId).order("id",{ascending:true}));;
+        }
+            
             if(error){
                 console.log(error);
             }
@@ -138,26 +162,77 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
     const [toggle,setToggle] = useState(true);
     const [menuButtonToggle,setMenuButtonToggle] = useState<number | null>(null);
      const [typeMenuButtonTogle,setTypeMenuButtonToggle] = useState<"Categories" | "Tags">("Categories");
-    useEffect(()=>{
-        ShowData()
-        GetTags();
-    },[])
+    
       useEffect(() => {
-   
-    ShowData();
-  
-    
-  }, [refreshFlag,id]);
-   useEffect(() => {
-   
-    
-  GetTags();
-    
-  }, [refreshFlagTags]);
-  
+  if (!user?.id) return;
+
+  let cancelled = false;
+
+  (async () => {
+    let data, error;
+
+    if (groupId == null) {
+      ({ data, error } = await supabase
+        .from("Categories")
+        .select(`*,Stickers(sticker_path)`)
+        .eq("user_id", user.id)
+        .is("group_id", null)
+        .order("id", { ascending: true }));
+    } else {
+      ({ data, error } = await supabase
+        .from("Categories")
+        .select(`*,Stickers(sticker_path)`)
+        .eq("user_id", user.id)
+        .eq("group_id", groupId)
+        .order("id", { ascending: true }));
+    }
+
+    if (cancelled) return;
+
+    if (error) console.log(error);
+    else setCategories(data ?? []);
+  })();
+
+  return () => {
+    cancelled = true;
+  };
+}, [user?.id, groupId, refreshFlag]);
   useEffect(() => {
-    console.log(tagId);
-  },[tagId])
+  if (!user?.id) return;
+
+  let cancelled = false;
+
+  (async () => {
+    let data, error;
+
+    if (groupId == null) {
+      ({ data, error } = await supabase
+        .from("Tags")
+        .select("*")
+        .eq("User_id", user.id)
+        .is("group_id", null)
+        .order("id", { ascending: true }));
+    } else {
+      ({ data, error } = await supabase
+        .from("Tags")
+        .select("*")
+        .eq("User_id", user.id)
+        .eq("group_id", groupId)
+        .order("id", { ascending: true }));
+    }
+
+    if (cancelled) return;
+
+    if (error) console.log(error);
+    else setTags(data ?? []);
+  })();
+
+  return () => {
+    cancelled = true;
+  };
+}, [user?.id, groupId, refreshFlagTags]);
+  
+  
   useEffect(()=>{
         if(!SideMenuVisible){
             setSideMenuHidden(false);
@@ -237,7 +312,7 @@ export default function TaskMenu({refreshFlag, ToggleModal,setToggleModal,setTas
                         setTaskFilter(cat.name);
                         setFilterImage(cat.Stickers.sticker_path);
                     }} key={i} className={menuButtonToggle == i && typeMenuButtonTogle == "Categories" ? " grid-cols-1 group  h-fit background-animation flex transition-all duration-200 flex-row justify-between align-middle p-1 bg-blue-300   items-center text-blue-900" : "flex transition-all duration-200 flex-row justify-between align-middle p-1   items-center text-blue-900"}  >
-                        <div className=" group-[]:translate-x-3  transition-all  flex flex-row align-middle items-center "><img src={"../img/"+cat.Stickers.sticker_path+".png"} width={20} height={10} alt="Calendar with number on it"></img> <p className="m-2">{cat.name}</p> </div> <div className="flex align-middle items-center"><p className="p-2">3</p><FontAwesomeIcon onClick={()=>{
+                        <div className=" group-[]:translate-x-3  transition-all  flex flex-row align-middle items-center "><img src={"/img/"+cat.Stickers.sticker_path+".png"} width={20} height={10} alt="Calendar with number on it"></img> <p className="m-2">{cat.name}</p> </div> <div className="flex align-middle items-center"><p className="p-2">3</p><FontAwesomeIcon onClick={()=>{
                             toggleMenu(); setId(cat.id)}} icon={faEllipsis} className="cursor-pointer"></FontAwesomeIcon></div>
                     </li>)}
                 

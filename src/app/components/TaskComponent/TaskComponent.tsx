@@ -9,6 +9,8 @@ import { useAuth } from "@/app/context/AuthContext";
 import useFilterTasks from "./hooks/useFilterTasks";
 import TagModalComponent from "../TagModal/TagModalComponent";
 import { TaskType } from "./Types/TaskType";
+import { useScope } from "@/app/context/ScopeContext";
+import { group } from "console";
 
 //import { FilterType } from "./Types/FilterType";
 export default function TaskComponent(){
@@ -46,19 +48,19 @@ export default function TaskComponent(){
 const [ModeModal,setModeModal]=useState<string | undefined>();
 const [ModeModalTag,setModeModalTag]=useState<string | undefined>();
     const {user} =useAuth();
-    
+    const {scope,groupId} = useScope();
     
     useEffect(()=>{
          
-      console.log("Filtering tasks with:", {Filter,categoryId,FilterImage,tagId});
+      
        
-    },[Filter,tasks,categoryId,FilterImage,tagId])
+    },[Filter,tasks,categoryId,FilterImage,tagId,groupId])
     
    
     useEffect(()=>{
         setSelectedTask(null);
         
-    },[Filter,categoryId,tagId])
+    },[Filter,categoryId,tagId,groupId])
     useEffect(()=>{
         
     },[ModeModalTag,selectedTag])

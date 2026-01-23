@@ -26,7 +26,7 @@ const GroupsComponent = () => {
   return (
     <div>
         {groups.map((group:any)=>(
-            <div onClick={()=>router.push(`/pages/Task`)} key={group.id} className='border p-4 m-4 rounded'>
+            <div onClick={()=>router.push(`/pages/Task/${group.id}`)} key={group.id} className='border p-4 m-4 rounded'>
                 <h2 className='text-xl font-bold mb-2'>{group.Name}</h2>
                 <p className='text-gray-600'>{group.Description}</p>
                 <p>{group.Users_Groups?.length || 0} members</p>

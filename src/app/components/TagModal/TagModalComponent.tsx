@@ -1,5 +1,6 @@
 import { supabase } from '@/app/connection/supabaseclient';
 import { useAuth } from '@/app/context/AuthContext';
+import { useScope } from '@/app/context/ScopeContext';
 import { BackgroundColor } from '@tiptap/extension-text-style';
 import React, { act, useEffect, useRef, useState } from 'react'
 interface TagModalProps{
@@ -22,8 +23,16 @@ const TagModalComponent = ({isActive,setActive,onUpdate,Mode,selectedTag,setSele
    
     const ColorInput = useRef<HTMLDivElement>(null); 
     const {user} = useAuth();
+    const {groupId} = useScope();
     const getTag=async()=>{
-            const {data,error} = await supabase.from("Tags").select("*").eq("id",selectedTag?.id).single();
+        let data,error;
+        if(groupId != null){
+            ({data, error} = await supabase.from("Tags").select("*").eq("id",selectedTag?.id).eq("group_id",groupId).single());
+        }
+        else{
+            ({data, error} = await supabase.from("Tags").select("*").eq("id",selectedTag?.id).single());
+        }
+            
             if(error){
                 console.log(error);
             }
@@ -33,7 +42,14 @@ const TagModalComponent = ({isActive,setActive,onUpdate,Mode,selectedTag,setSele
             }
     }
     const AddTag = async () =>{
-        const {error} = await supabase.from("Tags").insert({name:name,color:color,parent_id:parentTag,User_id:user?.id})
+        let data,error;
+        if(groupId != null){
+            ({data, error} = await supabase.from("Tags").insert({name:name,color:color,parent_id:parentTag,User_id:user?.id,group_id:groupId}));
+        }
+        else{
+            ({data, error} = await supabase.from("Tags").insert({name:name,color:color,parent_id:parentTag,User_id:user?.id}));
+        }
+        
 
         if(error){
             console.log(error)
@@ -103,7 +119,7 @@ const TagModalComponent = ({isActive,setActive,onUpdate,Mode,selectedTag,setSele
         }
         
        
-        console.log(id);
+   
         setActiveColor(id);
         setColor(colorCode);
         console.log(color);
@@ -111,18 +127,16 @@ const TagModalComponent = ({isActive,setActive,onUpdate,Mode,selectedTag,setSele
 
    useEffect(()=>{
         GetTags();
-        console.log(selectedTag);
+       
        
    },[isActive])
    useEffect(()=>{
-    console.log(selectedTag);
+   
     NoChild();
     setName(selectedTag?.name);
     setColor(selectedTag?.color);
    },[selectedTag])
-   useEffect(()=>{
-    console.log(parentTag);
-   },[parentTag])
+   
   return (
     <div className={isActive == true ? "flex absolute w-2/12 right-2/4 top-2/4  shadow-md rounded-md bg-white  bottom-2/4 m-auto h-1/4  " : " hidden"} >
             <div className=" inset-0 flex items-center align-middle relative justify-center w-full">

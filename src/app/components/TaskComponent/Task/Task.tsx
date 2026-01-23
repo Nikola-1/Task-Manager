@@ -9,6 +9,7 @@ import useOptionsMenu from '../hooks/useOptionsMenu';
 import { OptionsMenu } from '../../OptionsMenu/OptionsMenu';
 import {  useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
+import { useScope } from '@/app/context/ScopeContext';
 export interface TaskProps {
   task: TaskType;
   selectedTask: TaskType | null;
@@ -20,6 +21,9 @@ export interface TaskProps {
   
 }
 export default function Task({ task, filter, setSelectedTask, selectedTask, refreshTasks,refreshFlag }: TaskProps) {
+
+  const { groupId} = useScope();
+
   const updateStatus = async (id: number) => {
     const { error } = await supabase.from("tasks").update({ Completed: !task.Completed }).eq("id", id);
     if (!error) refreshTasks();
@@ -170,6 +174,7 @@ export default function Task({ task, filter, setSelectedTask, selectedTask, refr
 
            useEffect(()=>{
             console.log(task);
+            console.log("GroupId in Task component:", groupId);
            },[])
   return (
     <div

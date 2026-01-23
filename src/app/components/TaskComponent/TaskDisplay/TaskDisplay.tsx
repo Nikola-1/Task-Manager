@@ -22,6 +22,7 @@ import { TaskType } from "../Types/TaskType";
 import { useAuth } from "@/app/context/AuthContext";
 import useOptionsMenu from "../hooks/useOptionsMenu";
 import { OptionsMenu } from "../../OptionsMenu/OptionsMenu";
+import { useScope } from "@/app/context/ScopeContext";
 
 
 interface TaskDisplayProps {
@@ -73,7 +74,7 @@ export default function TaskDisplay({
     const [X,setX] = useState<number | undefined>();
     const [Y,setY] = useState<number | undefined>();
     const {user,setUser} =useAuth();
-    
+    const {groupId} = useScope();
      const editor = useEditor({
     extensions: [
       StarterKit,
@@ -178,6 +179,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
     name,
     date: dateStr,
     user_id: user?.id,
+    ...(groupId != null ? { Group_id: groupId } : { Group_id: null }),
   };
 
   if (categoryId && categoryId !== 0) {
@@ -248,7 +250,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
       console.log(user);
       console.log(tasksArray);
          refreshTasks();
-            
+           
     },[])
     
 
@@ -298,7 +300,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>)=>{
               <div className="flex items-center">
                 <FontAwesomeIcon icon={faLeftLong} onClick={()=>setSideMenuVisible(!SideMenuVisible)} className={`transition-all cursor-pointer ${SideMenuVisible ? "rotate-180 " : "rotate-0 transition-all"}`}/>
                 
-                    <h3 className="pr-3 pl-3 flex align-middle items-center ">{filter}{ filterImage == "" ? <p></p> : <img width={20} height={20} className="mx-2" src={"../img/"+filterImage+".png"}/>}</h3>
+                    <h3 className="pr-3 pl-3 flex align-middle items-center ">{filter}{ filterImage == "" ? <p></p> : <img width={20} height={20} className="mx-2" src={"/img/"+filterImage+".png"}/>}</h3>
                     </div>
                     <FontAwesomeIcon className="cursor-pointer text-2xl" icon={faEllipsis} onClick={(e)=>{toggleMenu(); setX(e.clientX); setY(e.clientY);}}></FontAwesomeIcon>
                     </div>

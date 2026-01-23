@@ -7,6 +7,7 @@ import SmileModal from "../../SmileModalComponent/SmileModal";
 import { supabase } from "@/app/connection/supabaseclient";
 import { useAuth } from "@/app/context/AuthContext";
 import { randInt } from "three/src/math/MathUtils.js";
+import { useScope } from "@/app/context/ScopeContext";
 
 
 interface ModalProps{
@@ -28,13 +29,20 @@ export default function ListModal({isActive,setActive,onUpdate,editListItem,setE
     const [picture,setPicture] = useState<object>();
     
     const {user} = useAuth();
-
+    const {groupId} = useScope();
       const handleSave = () => {
     
     onUpdate(); 
   };
     async function AddListItem(){
-        const {error} = await supabase.from('Categories').insert({sticker_id:ActiveSticker?.id,name:nameCategory,user_id:user?.id});
+        let data,error;
+        if(groupId != null){
+            ({data, error} = await supabase.from('Categories').insert({sticker_id:ActiveSticker?.id,name:nameCategory,user_id:user?.id,group_id:groupId}));
+        }
+        else{
+            ({data, error} = await supabase.from('Categories').insert({sticker_id:ActiveSticker?.id,name:nameCategory,user_id:user?.id}));
+        }
+        
         if(error){
             console.log(error);
             
@@ -45,7 +53,14 @@ export default function ListModal({isActive,setActive,onUpdate,editListItem,setE
         }
     }
     async function UpdateListItem(){
-        const {error} = await supabase.from('Categories').update({sticker_id:ActiveSticker?.id,name:nameCategory}).eq("id",editListItem?.id);
+        let data,error;
+        if(groupId != null){
+            ({data, error} = await supabase.from('Categories').update({sticker_id:ActiveSticker?.id,name:nameCategory,group_id:groupId}).eq("id",editListItem?.id));
+        }
+        else{
+            ({data, error} = await supabase.from('Categories').update({sticker_id:ActiveSticker?.id,name:nameCategory}).eq("id",editListItem?.id));
+        }
+        
         if(error){
             console.log(error);
             
